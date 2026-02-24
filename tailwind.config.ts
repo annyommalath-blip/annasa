@@ -13,6 +13,9 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -57,6 +60,26 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        status: {
+          backlog: "hsl(var(--status-backlog))",
+          "in-progress": "hsl(var(--status-in-progress))",
+          "needs-review": "hsl(var(--status-needs-review))",
+          approved: "hsl(var(--status-approved))",
+          scheduled: "hsl(var(--status-scheduled))",
+          posted: "hsl(var(--status-posted))",
+        },
+        priority: {
+          low: "hsl(var(--priority-low))",
+          medium: "hsl(var(--priority-medium))",
+          high: "hsl(var(--priority-high))",
+          urgent: "hsl(var(--priority-urgent))",
+        },
+        platform: {
+          instagram: "hsl(var(--platform-instagram))",
+          facebook: "hsl(var(--platform-facebook))",
+          tiktok: "hsl(var(--platform-tiktok))",
+          linkedin: "hsl(var(--platform-linkedin))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -65,20 +88,12 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
