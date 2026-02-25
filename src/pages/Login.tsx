@@ -1,35 +1,61 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { toast } from '@/hooks/use-toast';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { signIn, signUp, user } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  if (user) {
+    navigate('/my-tasks');
+    return null;
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/dashboard');
+    setLoading(true);
+
+    if (isLogin) {
+      const { error } = await signIn(email, password);
+      if (error) {
+        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      } else {
+        navigate('/my-tasks');
+      }
+    } else {
+      const { error } = await signUp(email, password, fullName);
+      if (error) {
+        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      } else {
+        toast({ title: 'Check your email', description: 'We sent you a confirmation link.' });
+      }
+    }
+    setLoading(false);
   };
 
   return (
     <div className="min-h-screen flex">
-      {/* Left branding panel */}
       <div className="hidden lg:flex lg:w-1/2 bg-primary relative overflow-hidden items-center justify-center">
         <div className="relative z-10 p-12 max-w-lg">
-          <h1 className="text-4xl font-extrabold text-primary-foreground mb-4 tracking-tight">
-            ContentFlow
-          </h1>
+          <h1 className="text-4xl font-extrabold text-primary-foreground mb-4 tracking-tight">TaskFlow</h1>
           <p className="text-lg text-primary-foreground/80 leading-relaxed">
-            Plan, create, and schedule your team's social media content — all in one place.
+            Plan, collaborate, and manage your team's work — all in one place.
           </p>
           <div className="mt-10 grid grid-cols-2 gap-4">
             {[
-              { label: 'Team Boards', desc: 'Kanban-style planning' },
-              { label: 'Calendar View', desc: 'Visual scheduling' },
-              { label: 'Multi-Platform', desc: 'IG, FB, TikTok, LinkedIn' },
-              { label: 'Approvals', desc: 'Review & approve flow' },
+              { label: 'Task Management', desc: 'Organize with ease' },
+              { label: 'Team Collaboration', desc: 'Work together' },
+              { label: 'Project Tracking', desc: 'Stay on schedule' },
+              { label: 'Notifications', desc: 'Never miss updates' },
             ].map(item => (
               <div key={item.label} className="bg-primary-foreground/10 rounded-lg p-3">
                 <p className="text-sm font-semibold text-primary-foreground">{item.label}</p>
@@ -38,13 +64,10 @@ export default function Login() {
             ))}
           </div>
         </div>
-        {/* Decorative circles */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary-foreground/5 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-72 h-72 bg-primary-foreground/5 rounded-full translate-y-1/3 -translate-x-1/3" />
-        <div className="absolute bottom-20 right-20 w-40 h-40 bg-primary-foreground/5 rounded-full" />
       </div>
 
-      {/* Right form panel */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-sm space-y-6">
           <div>
@@ -52,7 +75,7 @@ export default function Login() {
               {isLogin ? 'Welcome back' : 'Create account'}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              {isLogin ? 'Sign in to your workspace' : 'Get started with ContentFlow'}
+              {isLogin ? 'Sign in to your workspace' : 'Get started with TaskFlow'}
             </p>
           </div>
 
@@ -60,28 +83,25 @@ export default function Login() {
             {!isLogin && (
               <div className="space-y-2">
                 <Label htmlFor="name">Full name</Label>
-                <Input id="name" placeholder="Alex Rivera" />
+                <Input id="name" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Alex Rivera" required />
               </div>
             )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="alex@team.co" />
+              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="alex@team.co" required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="••••••••" />
+              <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required />
             </div>
-            <Button type="submit" className="w-full">
-              {isLogin ? 'Sign in' : 'Create account'}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Loading...' : isLogin ? 'Sign in' : 'Create account'}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground">
             {isLogin ? "Don't have an account? " : 'Already have an account? '}
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-primary font-medium hover:underline"
-            >
+            <button onClick={() => setIsLogin(!isLogin)} className="text-primary font-medium hover:underline">
               {isLogin ? 'Sign up' : 'Sign in'}
             </button>
           </p>

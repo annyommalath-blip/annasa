@@ -1,66 +1,83 @@
-export type Platform = 'instagram' | 'facebook' | 'tiktok' | 'linkedin';
-export type ContentType = 'reel' | 'post' | 'story';
-export type Priority = 'low' | 'medium' | 'high' | 'urgent';
-export type TaskStatus = 'backlog' | 'in-progress' | 'needs-review' | 'approved' | 'scheduled' | 'posted';
-export type UserRole = 'admin' | 'member';
+export type TaskStatus = 'not_started' | 'in_progress' | 'done' | 'draft' | 'needs_review' | 'approved' | 'scheduled' | 'posted' | 'failed';
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type ContentType = 'reel' | 'video' | 'image' | 'carousel' | 'text';
+export type Visibility = 'public' | 'private';
 
-export interface User {
+export interface Profile {
   id: string;
-  name: string;
-  email: string;
-  avatar: string;
-  role: UserRole;
-}
-
-export interface Team {
-  id: string;
-  name: string;
-  members: User[];
+  user_id: string;
+  full_name: string;
+  avatar_url: string | null;
+  created_at: string;
 }
 
 export interface Project {
   id: string;
   name: string;
-  description: string;
-  tags: string[];
-  memberIds: string[];
-  teamId: string;
-  createdAt: string;
-}
-
-export interface ChecklistItem {
-  id: string;
-  text: string;
-  completed: boolean;
-}
-
-export interface Comment {
-  id: string;
-  userId: string;
-  text: string;
-  createdAt: string;
+  description: string | null;
+  team_id: string;
+  tags: string[] | null;
+  created_by: string | null;
+  created_at: string;
 }
 
 export interface Task {
   id: string;
   title: string;
-  platform: Platform;
-  contentType: ContentType;
-  description: string;
-  ownerId: string;
-  dueDate: string;
-  priority: Priority;
+  description: string | null;
   status: TaskStatus;
-  checklist: ChecklistItem[];
-  attachments: string[];
-  comments: Comment[];
-  projectId: string;
+  priority: TaskPriority;
+  content_type: ContentType | null;
+  due_at: string | null;
+  owner_id: string | null;
+  created_by: string | null;
+  project_id: string;
+  visibility: Visibility;
+  platforms: string[] | null;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface Notification {
+export interface Subtask {
   id: string;
+  task_id: string;
+  title: string;
+  completed: boolean;
+  created_at: string;
+}
+
+export interface TaskComment {
+  id: string;
+  task_id: string;
+  user_id: string;
+  text: string;
+  created_at: string;
+}
+
+export interface TaskCollaborator {
+  id: string;
+  task_id: string;
+  user_id: string;
+  added_at: string;
+}
+
+export interface Attachment {
+  id: string;
+  task_id: string;
+  file_name: string;
+  file_url: string;
+  file_type: string | null;
+  file_size: number | null;
+  uploaded_by: string;
+  created_at: string;
+}
+
+export interface AppNotification {
+  id: string;
+  user_id: string;
+  type: string;
   message: string;
+  task_id: string | null;
   read: boolean;
-  createdAt: string;
-  taskId?: string;
+  created_at: string;
 }
