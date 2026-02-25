@@ -31,6 +31,7 @@ export interface Task {
   start_date: string | null;
   due_at: string | null;
   scheduled_at: string | null;
+  posted_at: string | null;
   owner_id: string | null;
   created_by: string | null;
   project_id: string;
@@ -38,6 +39,11 @@ export interface Task {
   platforms: string[] | null;
   section_id: string | null;
   position: number;
+  caption_master: string | null;
+  asset_urls: string[] | null;
+  error_message: string | null;
+  post_results: any | null;
+  reviewers: string[] | null;
   created_at: string;
   updated_at: string;
 }
