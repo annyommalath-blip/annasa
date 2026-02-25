@@ -34,6 +34,8 @@ export interface Task {
   project_id: string;
   visibility: Visibility;
   platforms: string[] | null;
+  section_id: string | null;
+  position: number;
   created_at: string;
   updated_at: string;
 }
