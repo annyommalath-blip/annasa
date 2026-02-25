@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Instagram, Facebook, Check, Clock, Send, Link, X, Image, Video } from 'lucide-react';
+import { Instagram, Facebook, Check, Clock, Send, Link, X, Image, Video, Sparkles, Loader2 } from 'lucide-react';
 import { Task } from '@/types';
 import { useUpdateTask } from '@/hooks/useTasks';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -40,6 +41,42 @@ export function SchedulePostDialog({ task, open, onOpenChange }: SchedulePostDia
   );
   const [mediaLinks, setMediaLinks] = useState<string[]>(task.asset_urls || []);
   const [newLink, setNewLink] = useState('');
+  const [isParsing, setIsParsing] = useState(false);
+
+  const handleAutoFill = async () => {
+    if (!task.description && !task.title) {
+      toast({ title: 'No content', description: 'Task has no description to parse.', variant: 'destructive' });
+      return;
+    }
+    setIsParsing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('parse-post-content', {
+        body: { title: task.title, description: task.description },
+      });
+      if (error) throw error;
+
+      if (data.caption) setCaption(data.caption);
+      if (data.links?.length > 0) {
+        setMediaLinks(prev => {
+          const existing = new Set(prev);
+          const newLinks = data.links.filter((l: string) => !existing.has(l));
+          return [...prev, ...newLinks];
+        });
+      }
+      if (data.platforms?.length > 0) {
+        setSelectedPlatforms(prev => {
+          const existing = new Set(prev);
+          data.platforms.forEach((p: string) => existing.add(p));
+          return Array.from(existing);
+        });
+      }
+      toast({ title: 'Auto-filled!', description: 'Caption, links, and platforms extracted from description.' });
+    } catch (err: any) {
+      toast({ title: 'Auto-fill failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setIsParsing(false);
+    }
+  };
 
   const togglePlatform = (id: string) => {
     setSelectedPlatforms(prev =>
@@ -102,11 +139,23 @@ export function SchedulePostDialog({ task, open, onOpenChange }: SchedulePostDia
 
         <div className="space-y-5">
           {/* Task info */}
-          <div className="bg-muted/50 rounded-lg p-3">
-            <p className="text-sm font-medium text-foreground">{task.title}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Posting date: {format(postingDate, 'EEEE, MMMM d, yyyy')}
-            </p>
+          <div className="bg-muted/50 rounded-lg p-3 flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-foreground">{task.title}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Posting date: {format(postingDate, 'EEEE, MMMM d, yyyy')}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0 gap-1.5 h-8 text-xs"
+              onClick={handleAutoFill}
+              disabled={isParsing}
+            >
+              {isParsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+              {isParsing ? 'Parsing...' : 'Auto-fill'}
+            </Button>
           </div>
 
           {/* Platform selection */}
