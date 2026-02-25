@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FolderKanban, Bell, CheckSquare, Plus, LogOut, Search } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Bell, CheckSquare, Plus, LogOut, Search, CalendarDays } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useProjects } from '@/hooks/useProjects';
@@ -8,6 +8,7 @@ import { useState } from 'react';
 
 const navItems = [
   { icon: CheckSquare, label: 'My Tasks', path: '/my-tasks' },
+  { icon: CalendarDays, label: 'Calendar', path: '/calendar' },
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: FolderKanban, label: 'Projects', path: '/projects' },
 ];
