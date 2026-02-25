@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useMyTasks, useUpdateTask } from '@/hooks/useTasks';
+import { useMyTasks } from '@/hooks/useTasks';
 import { useProjects } from '@/hooks/useProjects';
 import { Task } from '@/types';
-import { ChevronLeft, ChevronRight, Instagram, Facebook } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Instagram, Facebook, Link as LinkIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval,
@@ -12,12 +12,29 @@ import {
 import { SchedulePostDialog } from '@/components/calendar/SchedulePostDialog';
 import { cn } from '@/lib/utils';
 
-// TikTok icon as inline SVG since lucide doesn't have it
 function TikTokIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
       <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.3a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V8.98a8.18 8.18 0 004.76 1.52V7.05a4.84 4.84 0 01-1-.36z" />
     </svg>
+  );
+}
+
+// Platform badge chip like in Sprout Social
+function PlatformChip({ platform, count }: { platform: string; count?: number }) {
+  const config: Record<string, { icon: React.ElementType; bg: string; text: string }> = {
+    instagram: { icon: Instagram, bg: 'bg-pink-100 dark:bg-pink-950/40', text: 'text-pink-600 dark:text-pink-400' },
+    facebook: { icon: Facebook, bg: 'bg-blue-100 dark:bg-blue-950/40', text: 'text-blue-600 dark:text-blue-400' },
+    tiktok: { icon: TikTokIcon, bg: 'bg-muted', text: 'text-foreground' },
+  };
+  const c = config[platform];
+  if (!c) return null;
+  const Icon = c.icon;
+  return (
+    <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold", c.bg, c.text)}>
+      <Icon className="w-3 h-3" />
+      {count !== undefined && count}
+    </span>
   );
 }
 
@@ -27,9 +44,9 @@ export default function ContentCalendar() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  // Only show tasks that have a posting date (scheduled_at) and are completed
+  // Show ALL tasks that have a posting date (scheduled_at), regardless of status
   const calendarTasks = useMemo(() => {
-    return (tasks || []).filter(t => t.scheduled_at && t.status === 'done');
+    return (tasks || []).filter(t => t.scheduled_at);
   }, [tasks]);
 
   const monthStart = startOfMonth(currentMonth);
@@ -44,15 +61,26 @@ export default function ContentCalendar() {
 
   const getProjectName = (id: string) => projects?.find(p => p.id === id)?.name ?? '';
 
-  const getPlatformIcons = (platforms: string[] | null) => {
-    if (!platforms || platforms.length === 0) return null;
-    return (
-      <div className="flex gap-0.5">
-        {platforms.includes('instagram') && <Instagram className="w-3 h-3 text-pink-500" />}
-        {platforms.includes('facebook') && <Facebook className="w-3 h-3 text-blue-600" />}
-        {platforms.includes('tiktok') && <TikTokIcon className="w-3 h-3" />}
-      </div>
-    );
+  // Aggregate platform counts for a day
+  const getDayPlatformCounts = (dayTasks: Task[]) => {
+    const counts: Record<string, number> = {};
+    dayTasks.forEach(t => {
+      (t.platforms || []).forEach(p => {
+        counts[p] = (counts[p] || 0) + 1;
+      });
+    });
+    return counts;
+  };
+
+  // Get status color for task label
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case 'scheduled': return 'bg-accent/20 text-accent-foreground border-accent/30';
+      case 'posted': return 'bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800';
+      case 'done': return 'bg-primary/10 text-primary border-primary/20';
+      case 'failed': return 'bg-destructive/10 text-destructive border-destructive/20';
+      default: return 'bg-muted text-muted-foreground border-border';
+    }
   };
 
   return (
@@ -63,7 +91,7 @@ export default function ContentCalendar() {
           <div>
             <h1 className="text-2xl font-bold text-foreground">Content Calendar</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {calendarTasks.length} scheduled post{calendarTasks.length !== 1 ? 's' : ''}
+              {calendarTasks.length} post{calendarTasks.length !== 1 ? 's' : ''} scheduled
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -86,8 +114,8 @@ export default function ContentCalendar() {
         <div className="bg-card border border-border rounded-lg overflow-hidden">
           {/* Day headers */}
           <div className="grid grid-cols-7 border-b border-border">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <div key={day} className="px-2 py-2.5 text-xs font-semibold text-muted-foreground text-center bg-muted/30">
+            {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
+              <div key={day} className="px-2 py-2.5 text-xs font-semibold text-muted-foreground text-center bg-muted/30 border-r border-border last:border-r-0">
                 {day}
               </div>
             ))}
@@ -98,32 +126,52 @@ export default function ContentCalendar() {
             {calendarDays.map((day, idx) => {
               const dayTasks = getTasksForDay(day);
               const inMonth = isSameMonth(day, currentMonth);
+              const platformCounts = getDayPlatformCounts(dayTasks);
               return (
                 <div
                   key={idx}
                   className={cn(
-                    "min-h-[110px] border-b border-r border-border p-1.5 transition-colors",
-                    !inMonth && "bg-muted/20",
+                    "min-h-[130px] border-b border-r border-border last:border-r-0 p-1.5 transition-colors",
+                    !inMonth && "bg-muted/10",
                     isToday(day) && "bg-primary/5"
                   )}
                 >
-                  <div className={cn(
-                    "text-xs font-medium mb-1 flex items-center justify-center w-6 h-6 rounded-full",
-                    isToday(day) && "bg-primary text-primary-foreground",
-                    !inMonth && "text-muted-foreground/50",
-                    inMonth && !isToday(day) && "text-foreground"
-                  )}>
-                    {format(day, 'd')}
+                  {/* Day number */}
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className={cn(
+                      "text-xs font-medium flex items-center justify-center w-6 h-6 rounded-full",
+                      isToday(day) && "bg-primary text-primary-foreground",
+                      !inMonth && "text-muted-foreground/40",
+                      inMonth && !isToday(day) && "text-foreground"
+                    )}>
+                      {format(day, 'd')}
+                    </div>
                   </div>
+
+                  {/* Platform count chips - like Sprout Social */}
+                  {Object.keys(platformCounts).length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-1.5">
+                      {Object.entries(platformCounts).map(([platform, count]) => (
+                        <PlatformChip key={platform} platform={platform} count={count} />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Task labels with content name */}
                   <div className="space-y-1">
                     {dayTasks.slice(0, 3).map(task => (
                       <button
                         key={task.id}
                         onClick={() => setSelectedTask(task)}
-                        className="w-full text-left px-1.5 py-1 rounded text-[11px] font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors truncate flex items-center gap-1"
-                        title={task.title}
+                        className={cn(
+                          "w-full text-left px-1.5 py-1 rounded text-[10px] font-medium border transition-colors truncate flex items-center gap-1 hover:opacity-80",
+                          getStatusStyle(task.status)
+                        )}
+                        title={`${task.title} — ${task.status}`}
                       >
-                        {getPlatformIcons(task.platforms)}
+                        {task.asset_urls && task.asset_urls.length > 0 && (
+                          <LinkIcon className="w-2.5 h-2.5 shrink-0 opacity-60" />
+                        )}
                         <span className="truncate">{task.title}</span>
                       </button>
                     ))}
