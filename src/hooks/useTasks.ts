@@ -53,7 +53,9 @@ interface CreateTaskData {
   status?: TaskStatus;
   priority?: TaskPriority;
   content_type?: ContentType;
+  start_date?: string;
   due_at?: string;
+  scheduled_at?: string;
   project_id: string;
   visibility?: Visibility;
   owner_id?: string;

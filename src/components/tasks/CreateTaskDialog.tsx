@@ -36,7 +36,9 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('medium');
   const [projectId, setProjectId] = useState(defaultProjectId || '');
+  const [startDate, setStartDate] = useState<Date>();
   const [dueDate, setDueDate] = useState<Date>();
+  const [postingDate, setPostingDate] = useState<Date>();
   const [visibility, setVisibility] = useState<Visibility>('public');
   const [assigneeId, setAssigneeId] = useState('');
   const [newProjectName, setNewProjectName] = useState('');
@@ -47,7 +49,9 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
     setDescription('');
     setPriority('medium');
     setProjectId(defaultProjectId || '');
+    setStartDate(undefined);
     setDueDate(undefined);
+    setPostingDate(undefined);
     setVisibility('public');
     setAssigneeId('');
     setNewProjectName('');
@@ -84,7 +88,9 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
         description: description || undefined,
         priority,
         project_id: finalProjectId,
+        start_date: startDate ? startDate.toISOString() : undefined,
         due_at: dueDate ? dueDate.toISOString() : undefined,
+        scheduled_at: postingDate ? postingDate.toISOString() : undefined,
         visibility,
         owner_id: assigneeId || user?.id,
         status: 'not_started',
@@ -161,7 +167,23 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
+            {/* Start Date */}
+            <div className="space-y-2">
+              <Label>Start Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !startDate && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {startDate ? format(startDate, 'MMM d, yyyy') : 'Pick'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+            </div>
+
             {/* Due date */}
             <div className="space-y-2">
               <Label>Due Date</Label>
@@ -169,7 +191,7 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
                 <PopoverTrigger asChild>
                   <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !dueDate && "text-muted-foreground")}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dueDate ? format(dueDate, 'MMM d, yyyy') : 'Pick a date'}
+                    {dueDate ? format(dueDate, 'MMM d, yyyy') : 'Pick'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -178,23 +200,39 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
               </Popover>
             </div>
 
-            {/* Visibility */}
+            {/* Posting Date */}
             <div className="space-y-2">
-              <Label>Visibility</Label>
-              <Select value={visibility} onValueChange={v => setVisibility(v as Visibility)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="public">
-                    <span className="flex items-center gap-2"><Globe className="w-3 h-3" /> Public</span>
-                  </SelectItem>
-                  <SelectItem value="private">
-                    <span className="flex items-center gap-2"><Lock className="w-3 h-3" /> Private</span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Posting Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !postingDate && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {postingDate ? format(postingDate, 'MMM d, yyyy') : 'Pick'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={postingDate} onSelect={setPostingDate} initialFocus className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
             </div>
+          </div>
+
+          {/* Visibility */}
+          <div className="space-y-2">
+            <Label>Visibility</Label>
+            <Select value={visibility} onValueChange={v => setVisibility(v as Visibility)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="public">
+                  <span className="flex items-center gap-2"><Globe className="w-3 h-3" /> Public</span>
+                </SelectItem>
+                <SelectItem value="private">
+                  <span className="flex items-center gap-2"><Lock className="w-3 h-3" /> Private</span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

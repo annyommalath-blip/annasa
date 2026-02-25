@@ -276,6 +276,33 @@ export function TaskDetailDrawer({ taskId, open, onClose }: TaskDetailDrawerProp
                 )}
               </MetaRow>
 
+              {/* Start Date */}
+              <MetaRow label="Start date">
+                {canEdit ? (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className={cn(
+                        "flex items-center gap-2 text-sm h-8 px-2 -ml-2 rounded-md hover:bg-muted/50 transition-colors",
+                        !task.start_date && "text-muted-foreground"
+                      )}>
+                        <CalendarIcon className="w-4 h-4 text-muted-foreground" />
+                        {task.start_date ? format(new Date(task.start_date), 'MMM d, yyyy') : 'No start date'}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={task.start_date ? new Date(task.start_date) : undefined}
+                        onSelect={d => handleUpdate({ start_date: d?.toISOString() || null })}
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                ) : (
+                  <span className="text-sm">{task.start_date ? format(new Date(task.start_date), 'MMM d, yyyy') : 'No start date'}</span>
+                )}
+              </MetaRow>
+
               {/* Due Date */}
               <MetaRow label="Due date">
                 {canEdit ? (
@@ -300,6 +327,33 @@ export function TaskDetailDrawer({ taskId, open, onClose }: TaskDetailDrawerProp
                   </Popover>
                 ) : (
                   <span className="text-sm">{task.due_at ? format(new Date(task.due_at), 'MMM d, yyyy') : 'No due date'}</span>
+                )}
+              </MetaRow>
+
+              {/* Posting Date */}
+              <MetaRow label="Posting date">
+                {canEdit ? (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className={cn(
+                        "flex items-center gap-2 text-sm h-8 px-2 -ml-2 rounded-md hover:bg-muted/50 transition-colors",
+                        !task.scheduled_at && "text-muted-foreground"
+                      )}>
+                        <CalendarIcon className="w-4 h-4 text-muted-foreground" />
+                        {task.scheduled_at ? format(new Date(task.scheduled_at), 'MMM d, yyyy') : 'No posting date'}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={task.scheduled_at ? new Date(task.scheduled_at) : undefined}
+                        onSelect={d => handleUpdate({ scheduled_at: d?.toISOString() || null })}
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                ) : (
+                  <span className="text-sm">{task.scheduled_at ? format(new Date(task.scheduled_at), 'MMM d, yyyy') : 'No posting date'}</span>
                 )}
               </MetaRow>
 

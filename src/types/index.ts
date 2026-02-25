@@ -28,7 +28,9 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   content_type: ContentType | null;
+  start_date: string | null;
   due_at: string | null;
+  scheduled_at: string | null;
   owner_id: string | null;
   created_by: string | null;
   project_id: string;
