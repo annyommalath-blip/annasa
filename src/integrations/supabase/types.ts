@@ -465,6 +465,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_team_with_member: {
+        Args: { _name: string; _user_id: string }
+        Returns: string
+      }
       get_user_team_ids: { Args: { _user_id: string }; Returns: string[] }
       has_role: {
         Args: {
