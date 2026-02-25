@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Instagram, Facebook, Check, Clock, Send } from 'lucide-react';
+import { Instagram, Facebook, Check, Clock, Send, Link, X, Image, Video } from 'lucide-react';
 import { Task } from '@/types';
 import { useUpdateTask } from '@/hooks/useTasks';
 import { toast } from '@/hooks/use-toast';
@@ -36,14 +36,33 @@ export function SchedulePostDialog({ task, open, onOpenChange }: SchedulePostDia
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(task.platforms || []);
   const [postTime, setPostTime] = useState('09:00');
   const [caption, setCaption] = useState(
-    (task as any).caption_master || task.description || ''
+    task.caption_master || task.description || ''
   );
+  const [mediaLinks, setMediaLinks] = useState<string[]>(task.asset_urls || []);
+  const [newLink, setNewLink] = useState('');
 
   const togglePlatform = (id: string) => {
     setSelectedPlatforms(prev =>
       prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
     );
   };
+
+  const addMediaLink = () => {
+    const trimmed = newLink.trim();
+    if (!trimmed) return;
+    if (!trimmed.startsWith('http')) {
+      toast({ title: 'Invalid link', description: 'Please enter a valid URL', variant: 'destructive' });
+      return;
+    }
+    setMediaLinks(prev => [...prev, trimmed]);
+    setNewLink('');
+  };
+
+  const removeMediaLink = (index: number) => {
+    setMediaLinks(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const isGoogleDriveLink = (url: string) => url.includes('drive.google.com') || url.includes('docs.google.com');
 
   const postingDate = task.scheduled_at ? new Date(task.scheduled_at) : new Date();
 
@@ -64,6 +83,7 @@ export function SchedulePostDialog({ task, open, onOpenChange }: SchedulePostDia
         platforms: selectedPlatforms,
         scheduled_at: scheduledDate.toISOString(),
         caption_master: caption,
+        asset_urls: mediaLinks,
         status: 'scheduled' as any,
       });
       toast({ title: 'Post scheduled', description: `Scheduled for ${format(scheduledDate, 'MMM d, yyyy h:mm a')} on ${selectedPlatforms.join(', ')}` });
@@ -132,7 +152,57 @@ export function SchedulePostDialog({ task, open, onOpenChange }: SchedulePostDia
             </div>
           </div>
 
-          {/* Caption */}
+          {/* Media links */}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold">Media (Google Drive links)</Label>
+            <div className="space-y-1.5">
+              {mediaLinks.map((link, idx) => (
+                <div key={idx} className="flex items-center gap-2 bg-muted/50 rounded-md px-3 py-2 group">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {isGoogleDriveLink(link) ? (
+                      <Image className="w-4 h-4 text-primary shrink-0" />
+                    ) : (
+                      <Link className="w-4 h-4 text-muted-foreground shrink-0" />
+                    )}
+                    <a
+                      href={link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-primary hover:underline truncate"
+                    >
+                      {link}
+                    </a>
+                  </div>
+                  <button
+                    onClick={() => removeMediaLink(idx)}
+                    className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all shrink-0"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="url"
+                  value={newLink}
+                  onChange={e => setNewLink(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addMediaLink())}
+                  placeholder="Paste Google Drive link..."
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent pl-9 pr-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                />
+              </div>
+              <Button type="button" variant="outline" size="sm" className="h-9 px-3" onClick={addMediaLink}>
+                Add
+              </Button>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Paste sharing links to photos or videos from Google Drive.
+            </p>
+          </div>
+
           <div className="space-y-2">
             <Label className="text-sm font-semibold">Caption</Label>
             <Textarea
