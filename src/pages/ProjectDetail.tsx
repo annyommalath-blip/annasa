@@ -1,160 +1,97 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useApp } from '@/contexts/AppContext';
-import { KanbanBoard } from '@/components/tasks/KanbanBoard';
-import { TaskModal } from '@/components/tasks/TaskModal';
-import { CalendarGrid } from '@/components/calendar/CalendarGrid';
+import { useProject } from '@/hooks/useProjects';
+import { useTasks } from '@/hooks/useTasks';
+import { useProfiles } from '@/hooks/useProfiles';
 import { StatusBadge } from '@/components/tasks/StatusBadge';
 import { PriorityBadge } from '@/components/tasks/PriorityBadge';
-import { PlatformIcon } from '@/components/tasks/PlatformIcon';
-import { Task } from '@/types';
-import { Kanban, List, Calendar, Filter } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { TaskDetailDrawer } from '@/components/tasks/TaskDetailDrawer';
+import { CreateTaskDialog } from '@/components/tasks/CreateTaskDialog';
+import { Plus, Globe, Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
-type ViewMode = 'board' | 'list' | 'calendar';
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
-  const { projects, getProjectTasks, getUserById } = useApp();
   const navigate = useNavigate();
-  const [view, setView] = useState<ViewMode>('board');
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [filterPlatform, setFilterPlatform] = useState<string>('all');
-  const [filterPriority, setFilterPriority] = useState<string>('all');
+  const { data: project, isLoading: projectLoading } = useProject(id);
+  const { data: tasks, isLoading: tasksLoading } = useTasks(id);
+  const { data: profiles } = useProfiles();
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
 
-  const project = projects.find(p => p.id === id);
-  if (!project) {
-    return (
-      <AppLayout>
-        <div className="text-center py-20 text-muted-foreground">Project not found</div>
-      </AppLayout>
-    );
-  }
+  const getProfileName = (uid: string | null) => profiles?.find(p => p.user_id === uid)?.full_name ?? '';
+  const getInitials = (uid: string | null) => {
+    const name = getProfileName(uid);
+    return name ? name.split(' ').map(n => n[0]).join('').slice(0, 2) : '?';
+  };
 
-  let projectTasks = getProjectTasks(project.id);
-  if (filterPlatform !== 'all') projectTasks = projectTasks.filter(t => t.platform === filterPlatform);
-  if (filterPriority !== 'all') projectTasks = projectTasks.filter(t => t.priority === filterPriority);
+  if (projectLoading) return <AppLayout><div className="text-muted-foreground">Loading...</div></AppLayout>;
+  if (!project) return <AppLayout><div className="text-muted-foreground">Project not found</div></AppLayout>;
 
-  const views: { mode: ViewMode; icon: typeof Kanban; label: string }[] = [
-    { mode: 'board', icon: Kanban, label: 'Board' },
-    { mode: 'list', icon: List, label: 'List' },
-    { mode: 'calendar', icon: Calendar, label: 'Calendar' },
-  ];
+  const projectTasks = tasks || [];
 
   return (
     <AppLayout>
-      <div>
+      <div className="max-w-6xl">
         <div className="mb-6">
-          <button
-            onClick={() => navigate('/projects')}
-            className="text-sm text-muted-foreground hover:text-foreground mb-2 block transition-colors"
-          >
-            ← Projects
-          </button>
-          <h1 className="text-2xl font-bold text-foreground">{project.name}</h1>
-          <p className="text-muted-foreground mt-1">{project.description}</p>
+          <button onClick={() => navigate('/projects')} className="text-sm text-muted-foreground hover:text-foreground mb-2 block">← Projects</button>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">{project.name}</h1>
+              {project.description && <p className="text-muted-foreground mt-1">{project.description}</p>}
+            </div>
+            <Button onClick={() => setShowCreate(true)}>
+              <Plus className="w-4 h-4 mr-2" /> Add Task
+            </Button>
+          </div>
         </div>
 
-        {/* View toggle + filters */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex bg-muted rounded-lg p-1">
-            {views.map(v => (
-              <button
-                key={v.mode}
-                onClick={() => setView(v.mode)}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
-                  view === v.mode
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
+        <div className="bg-card border border-border rounded-lg overflow-hidden">
+          <div className="grid grid-cols-[1fr_100px_100px_80px_100px_80px] gap-0 px-4 py-2.5 bg-muted/50 border-b border-border text-xs font-medium text-muted-foreground">
+            <span>Task</span>
+            <span>Assignee</span>
+            <span>Due Date</span>
+            <span className="text-center">Visibility</span>
+            <span>Status</span>
+            <span>Priority</span>
+          </div>
+
+          {tasksLoading ? (
+            <div className="p-12 text-center text-muted-foreground text-sm">Loading...</div>
+          ) : projectTasks.length === 0 ? (
+            <div className="p-12 text-center text-muted-foreground text-sm">
+              No tasks yet. Click "Add Task" to create one.
+            </div>
+          ) : (
+            projectTasks.map(task => (
+              <div
+                key={task.id}
+                onClick={() => setSelectedTaskId(task.id)}
+                className="grid grid-cols-[1fr_100px_100px_80px_100px_80px] gap-0 px-4 py-3 border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer group"
               >
-                <v.icon className="w-4 h-4" />
-                {v.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            <Select value={filterPlatform} onValueChange={setFilterPlatform}>
-              <SelectTrigger className="w-32 h-8 text-xs">
-                <SelectValue placeholder="Platform" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Platforms</SelectItem>
-                <SelectItem value="instagram">Instagram</SelectItem>
-                <SelectItem value="facebook">Facebook</SelectItem>
-                <SelectItem value="tiktok">TikTok</SelectItem>
-                <SelectItem value="linkedin">LinkedIn</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={filterPriority} onValueChange={setFilterPriority}>
-              <SelectTrigger className="w-28 h-8 text-xs">
-                <SelectValue placeholder="Priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Priority</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="urgent">Urgent</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Content views */}
-        {view === 'board' && (
-          <KanbanBoard tasks={projectTasks} onTaskClick={setSelectedTask} />
-        )}
-
-        {view === 'list' && (
-          <div className="bg-card border border-border rounded-lg divide-y divide-border">
-            {projectTasks.length === 0 ? (
-              <div className="p-12 text-center text-muted-foreground text-sm">No tasks match your filters</div>
-            ) : (
-              projectTasks.map(task => {
-                const owner = getUserById(task.ownerId);
-                return (
-                  <div
-                    key={task.id}
-                    onClick={() => setSelectedTask(task)}
-                    className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors cursor-pointer"
-                  >
-                    <PlatformIcon platform={task.platform} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground">{task.title}</p>
-                      <p className="text-xs text-muted-foreground capitalize">
-                        {task.contentType} · {format(new Date(task.dueDate), 'MMM d')}
-                      </p>
-                    </div>
-                    <StatusBadge status={task.status} />
-                    <PriorityBadge priority={task.priority} />
-                    {owner && (
-                      <div
-                        className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary text-[10px] font-semibold"
-                        title={owner.name}
-                      >
-                        {owner.name.split(' ').map(n => n[0]).join('')}
-                      </div>
-                    )}
+                <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{task.title}</p>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary text-[10px] font-semibold" title={getProfileName(task.owner_id)}>
+                    {getInitials(task.owner_id)}
                   </div>
-                );
-              })
-            )}
-          </div>
-        )}
-
-        {view === 'calendar' && (
-          <CalendarGrid tasks={projectTasks} onTaskClick={setSelectedTask} />
-        )}
-
-        <TaskModal task={selectedTask} open={!!selectedTask} onClose={() => setSelectedTask(null)} />
+                  <span className="text-xs text-muted-foreground truncate">{getProfileName(task.owner_id).split(' ')[0]}</span>
+                </div>
+                <span className="text-xs text-muted-foreground flex items-center">{task.due_at ? format(new Date(task.due_at), 'MMM d') : '—'}</span>
+                <div className="flex items-center justify-center">
+                  {task.visibility === 'public' ? <Globe className="w-3.5 h-3.5 text-muted-foreground" /> : <Lock className="w-3.5 h-3.5 text-muted-foreground" />}
+                </div>
+                <div className="flex items-center"><StatusBadge status={task.status} /></div>
+                <div className="flex items-center"><PriorityBadge priority={task.priority} /></div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
+
+      <TaskDetailDrawer taskId={selectedTaskId} open={!!selectedTaskId} onClose={() => setSelectedTaskId(null)} />
+      <CreateTaskDialog open={showCreate} onOpenChange={setShowCreate} defaultProjectId={id} />
     </AppLayout>
   );
 }
