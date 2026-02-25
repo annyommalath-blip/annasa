@@ -125,29 +125,35 @@ export function SchedulePostDialog({ task, open, onOpenChange }: SchedulePostDia
         status: 'scheduled' as any,
       });
 
-      // 2. Send to n8n via webhook
-      try {
-        const { error: webhookError } = await supabase.functions.invoke('schedule-post-webhook', {
-          body: { task_id: task.id },
-        });
-        if (webhookError) {
-          console.error('Webhook error:', webhookError);
+      // 2. Post directly to Facebook
+      if (selectedPlatforms.includes('facebook')) {
+        try {
+          const { data: fbData, error: fbError } = await supabase.functions.invoke('post-to-facebook', {
+            body: { task_id: task.id },
+          });
+          if (fbError) {
+            console.error('Facebook post error:', fbError);
+            toast({
+              title: 'Post scheduled but Facebook failed',
+              description: `Scheduled for ${format(scheduledDate, 'MMM d, yyyy h:mm a')}. Facebook posting failed — check your token.`,
+              variant: 'destructive',
+            });
+          } else {
+            toast({
+              title: 'Posted to Facebook! 🎉',
+              description: `Successfully posted on ${format(scheduledDate, 'MMM d, yyyy h:mm a')}`,
+            });
+          }
+        } catch {
           toast({
             title: 'Post scheduled',
-            description: `Scheduled for ${format(scheduledDate, 'MMM d, yyyy h:mm a')}, but n8n notification failed. It will retry.`,
-            variant: 'default',
-          });
-        } else {
-          toast({
-            title: 'Post scheduled & sent to n8n!',
-            description: `Scheduled for ${format(scheduledDate, 'MMM d, yyyy h:mm a')} on ${selectedPlatforms.join(', ')}`,
+            description: `Saved for ${format(scheduledDate, 'MMM d, yyyy h:mm a')}. Facebook posting will retry.`,
           });
         }
-      } catch {
-        // Non-blocking — task is already saved
+      } else {
         toast({
           title: 'Post scheduled',
-          description: `Saved for ${format(scheduledDate, 'MMM d, yyyy h:mm a')}. n8n webhook will process it.`,
+          description: `Scheduled for ${format(scheduledDate, 'MMM d, yyyy h:mm a')} on ${selectedPlatforms.join(', ')}`,
         });
       }
 

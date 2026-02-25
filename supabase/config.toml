@@ -1,1 +1,10 @@
 project_id = "uuvormhhnbzqiwsourgl"
+
+[functions.post-to-facebook]
+verify_jwt = false
+
+[functions.schedule-post-webhook]
+verify_jwt = false
+
+[functions.parse-post-content]
+verify_jwt = false
