@@ -115,6 +115,7 @@ export function SchedulePostDialog({ task, open, onOpenChange }: SchedulePostDia
     scheduledDate.setHours(hours, minutes, 0, 0);
 
     try {
+      // 1. Update the task in the database
       await updateTask.mutateAsync({
         id: task.id,
         platforms: selectedPlatforms,
@@ -123,7 +124,33 @@ export function SchedulePostDialog({ task, open, onOpenChange }: SchedulePostDia
         asset_urls: mediaLinks,
         status: 'scheduled' as any,
       });
-      toast({ title: 'Post scheduled', description: `Scheduled for ${format(scheduledDate, 'MMM d, yyyy h:mm a')} on ${selectedPlatforms.join(', ')}` });
+
+      // 2. Send to n8n via webhook
+      try {
+        const { error: webhookError } = await supabase.functions.invoke('schedule-post-webhook', {
+          body: { task_id: task.id },
+        });
+        if (webhookError) {
+          console.error('Webhook error:', webhookError);
+          toast({
+            title: 'Post scheduled',
+            description: `Scheduled for ${format(scheduledDate, 'MMM d, yyyy h:mm a')}, but n8n notification failed. It will retry.`,
+            variant: 'default',
+          });
+        } else {
+          toast({
+            title: 'Post scheduled & sent to n8n!',
+            description: `Scheduled for ${format(scheduledDate, 'MMM d, yyyy h:mm a')} on ${selectedPlatforms.join(', ')}`,
+          });
+        }
+      } catch {
+        // Non-blocking — task is already saved
+        toast({
+          title: 'Post scheduled',
+          description: `Saved for ${format(scheduledDate, 'MMM d, yyyy h:mm a')}. n8n webhook will process it.`,
+        });
+      }
+
       onOpenChange(false);
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
