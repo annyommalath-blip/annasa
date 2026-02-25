@@ -362,6 +362,7 @@ export type Database = {
           reviewers: string[] | null
           scheduled_at: string | null
           section_id: string | null
+          start_date: string | null
           status: Database["public"]["Enums"]["task_status"]
           title: string
           updated_at: string
@@ -387,6 +388,7 @@ export type Database = {
           reviewers?: string[] | null
           scheduled_at?: string | null
           section_id?: string | null
+          start_date?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           title: string
           updated_at?: string
@@ -412,6 +414,7 @@ export type Database = {
           reviewers?: string[] | null
           scheduled_at?: string | null
           section_id?: string | null
+          start_date?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           title?: string
           updated_at?: string
