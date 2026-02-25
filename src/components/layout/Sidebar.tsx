@@ -1,9 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FolderKanban, Calendar, Bell } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Calendar, Bell, CheckSquare, Plus } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
 
 const navItems = [
+  { icon: CheckSquare, label: 'My Tasks', path: '/my-tasks' },
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: FolderKanban, label: 'Projects', path: '/projects' },
   { icon: Calendar, label: 'Calendar', path: '/calendar' },
@@ -11,16 +12,27 @@ const navItems = [
 
 export function Sidebar() {
   const location = useLocation();
-  const { currentUser, notifications } = useApp();
+  const { currentUser, notifications, setShowTaskForm } = useApp();
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-64 bg-card border-r border-border flex flex-col z-30">
-      <div className="p-6">
+      <div className="p-6 flex items-center justify-between">
         <h1 className="text-xl font-bold tracking-tight">
           <span className="text-primary">Content</span>
           <span className="text-foreground">Flow</span>
         </h1>
+      </div>
+
+      {/* Add Task button */}
+      <div className="px-3 mb-2">
+        <button
+          onClick={() => setShowTaskForm(true)}
+          className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          Add Task
+        </button>
       </div>
 
       <nav className="flex-1 px-3 space-y-1">
