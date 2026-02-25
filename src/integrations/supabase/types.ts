@@ -178,6 +178,38 @@ export type Database = {
           },
         ]
       }
+      project_sections: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          position: number
+          project_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+          project_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_sections_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           created_at: string
@@ -322,12 +354,14 @@ export type Database = {
           id: string
           owner_id: string | null
           platforms: string[] | null
+          position: number
           post_results: Json | null
           posted_at: string | null
           priority: Database["public"]["Enums"]["task_priority"]
           project_id: string
           reviewers: string[] | null
           scheduled_at: string | null
+          section_id: string | null
           status: Database["public"]["Enums"]["task_status"]
           title: string
           updated_at: string
@@ -345,12 +379,14 @@ export type Database = {
           id?: string
           owner_id?: string | null
           platforms?: string[] | null
+          position?: number
           post_results?: Json | null
           posted_at?: string | null
           priority?: Database["public"]["Enums"]["task_priority"]
           project_id: string
           reviewers?: string[] | null
           scheduled_at?: string | null
+          section_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           title: string
           updated_at?: string
@@ -368,12 +404,14 @@ export type Database = {
           id?: string
           owner_id?: string | null
           platforms?: string[] | null
+          position?: number
           post_results?: Json | null
           posted_at?: string | null
           priority?: Database["public"]["Enums"]["task_priority"]
           project_id?: string
           reviewers?: string[] | null
           scheduled_at?: string | null
+          section_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           title?: string
           updated_at?: string
@@ -385,6 +423,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "project_sections"
             referencedColumns: ["id"]
           },
         ]
