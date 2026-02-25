@@ -21,7 +21,7 @@ export function useTeamMembers(teamId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('team_members')
-        .select('*, profiles:user_id(id, user_id, full_name, avatar_url)')
+        .select('*')
         .eq('team_id', teamId!);
       if (error) throw error;
       return data;
@@ -35,21 +35,12 @@ export function useCreateTeam() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (name: string) => {
-      // Create team
-      const { data: team, error: teamError } = await supabase
-        .from('teams')
-        .insert({ name, created_by: user!.id })
-        .select()
-        .single();
-      if (teamError) throw teamError;
-
-      // Add self as admin member
-      const { error: memberError } = await supabase
-        .from('team_members')
-        .insert({ team_id: team.id, user_id: user!.id, role: 'admin' as const });
-      if (memberError) throw memberError;
-
-      return team;
+      const { data, error } = await supabase.rpc('create_team_with_member', {
+        _name: name,
+        _user_id: user!.id,
+      });
+      if (error) throw error;
+      return data as string; // returns team id
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['teams'] }),
   });
