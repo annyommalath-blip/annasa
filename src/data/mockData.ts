@@ -12,26 +12,7 @@ export const mockTeam: Team = {
   members: mockUsers,
 };
 
-export const mockProjects: Project[] = [
-  {
-    id: 'p1',
-    name: 'RedPaw Launch',
-    description: 'Product launch campaign across all social channels',
-    tags: ['launch', 'q1', 'priority'],
-    memberIds: ['u1', 'u2', 'u3'],
-    teamId: 't1',
-    createdAt: '2026-02-01',
-  },
-  {
-    id: 'p2',
-    name: 'Spring Collection',
-    description: 'Spring 2026 collection showcase and promotion',
-    tags: ['seasonal', 'product'],
-    memberIds: ['u1', 'u3'],
-    teamId: 't1',
-    createdAt: '2026-02-10',
-  },
-];
+export const mockProjects: Project[] = [];
 
 export const mockTasks: Task[] = [
   {
