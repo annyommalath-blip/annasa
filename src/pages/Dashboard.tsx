@@ -9,6 +9,7 @@ import { TaskDetailDrawer } from '@/components/tasks/TaskDetailDrawer';
 import { Users, FolderKanban, CheckCircle2, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { PendingInvitations } from '@/components/projects/PendingInvitations';
 
 export default function Dashboard() {
   const { data: tasks, isLoading } = useTasks();
@@ -42,6 +43,8 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
           <p className="text-muted-foreground mt-1">Team overview</p>
         </div>
+
+        <PendingInvitations />
 
         <div className="grid grid-cols-4 gap-4 mb-6">
           {stats.map(stat => (

@@ -91,3 +91,12 @@ export interface AppNotification {
   read: boolean;
   created_at: string;
 }
+
+export interface ProjectInvitation {
+  id: string;
+  project_id: string;
+  email: string;
+  invited_by: string;
+  status: string;
+  created_at: string;
+}
