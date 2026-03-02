@@ -9,7 +9,7 @@ import { StatusBadge } from '@/components/tasks/StatusBadge';
 import { PriorityBadge } from '@/components/tasks/PriorityBadge';
 import { TaskDetailDrawer } from '@/components/tasks/TaskDetailDrawer';
 import { CreateTaskDialog } from '@/components/tasks/CreateTaskDialog';
-import { Plus, Globe, Lock, GripVertical, ChevronDown, ChevronRight, Trash2, Pencil } from 'lucide-react';
+import { Plus, Globe, Lock, GripVertical, ChevronDown, ChevronRight, Trash2, Pencil, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
@@ -33,6 +33,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Task } from '@/types';
+import { InviteDialog } from '@/components/projects/InviteDialog';
 
 const UNSECTIONED = '__unsectioned__';
 const SECTION_PREFIX = 'section::';
@@ -57,6 +58,7 @@ export default function ProjectDetail() {
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [editSectionName, setEditSectionName] = useState('');
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
+  const [showInvite, setShowInvite] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -239,6 +241,9 @@ export default function ProjectDetail() {
               {project.description && <p className="text-muted-foreground mt-1">{project.description}</p>}
             </div>
             <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={() => setShowInvite(true)}>
+                <UserPlus className="w-4 h-4 mr-2" /> Invite
+              </Button>
               <Button variant="outline" onClick={() => setAddingSectionAt(orderedSectionIds.length)}>
                 <Plus className="w-4 h-4 mr-2" /> Add Section
               </Button>
@@ -379,6 +384,7 @@ export default function ProjectDetail() {
 
       <TaskDetailDrawer taskId={selectedTaskId} open={!!selectedTaskId} onClose={() => setSelectedTaskId(null)} />
       <CreateTaskDialog open={showCreate} onOpenChange={setShowCreate} defaultProjectId={id} />
+      {id && <InviteDialog open={showInvite} onOpenChange={setShowInvite} projectId={id} />}
     </AppLayout>
   );
 }
