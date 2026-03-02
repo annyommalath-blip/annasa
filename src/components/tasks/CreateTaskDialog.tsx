@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Globe, Lock } from 'lucide-react';
+import { CalendarIcon, Globe, Lock, Paperclip, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useCreateTask } from '@/hooks/useTasks';
@@ -17,6 +17,7 @@ import { useProfiles } from '@/hooks/useProfiles';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { TaskPriority, Visibility } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -43,6 +44,7 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
   const [assigneeId, setAssigneeId] = useState('');
   const [newProjectName, setNewProjectName] = useState('');
   const [showNewProject, setShowNewProject] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
 
   const reset = () => {
     setTitle('');
@@ -56,6 +58,7 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
     setAssigneeId('');
     setNewProjectName('');
     setShowNewProject(false);
+    setFiles([]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,7 +86,7 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
     }
 
     try {
-      await createTask.mutateAsync({
+      const task = await createTask.mutateAsync({
         title: title.trim(),
         description: description || undefined,
         priority,
@@ -95,6 +98,31 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
         owner_id: assigneeId || user?.id,
         status: 'not_started',
       });
+      // Upload attachments if any
+      if (files.length > 0) {
+        for (const file of files) {
+          const filePath = `${task.id}/${Date.now()}_${file.name}`;
+          const { error: uploadError } = await supabase.storage
+            .from('task-attachments')
+            .upload(filePath, file);
+          if (uploadError) {
+            console.error('Upload error:', uploadError);
+            continue;
+          }
+          const { data: urlData } = supabase.storage
+            .from('task-attachments')
+            .getPublicUrl(filePath);
+          await supabase.from('attachments').insert({
+            task_id: task.id,
+            file_name: file.name,
+            file_url: urlData.publicUrl,
+            file_type: file.type || null,
+            file_size: file.size,
+            uploaded_by: user!.id,
+          });
+        }
+      }
+
       toast({ title: 'Task created' });
       reset();
       onOpenChange(false);
@@ -238,6 +266,36 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
           <div className="space-y-2">
             <Label>Description</Label>
             <Textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Add details..." rows={3} />
+          </div>
+
+          {/* Attachments */}
+          <div className="space-y-2">
+            <Label>Attachments</Label>
+            <label className="flex items-center gap-2 px-3 py-2 border border-dashed border-border rounded-md cursor-pointer hover:bg-muted/50 transition-colors text-sm text-muted-foreground">
+              <Paperclip className="w-4 h-4" />
+              <span>Click to attach files</span>
+              <input
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files) setFiles(prev => [...prev, ...Array.from(e.target.files!)]);
+                  e.target.value = '';
+                }}
+              />
+            </label>
+            {files.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {files.map((file, i) => (
+                  <div key={i} className="flex items-center gap-1.5 bg-muted px-2 py-1 rounded text-xs">
+                    <span className="truncate max-w-[150px]">{file.name}</span>
+                    <button type="button" onClick={() => setFiles(prev => prev.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-foreground">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
