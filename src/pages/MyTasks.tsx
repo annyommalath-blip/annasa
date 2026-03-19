@@ -63,13 +63,6 @@ export default function MyTasks() {
                 <SelectItem value="done">Done</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={sortBy} onValueChange={v => setSortBy(v as 'created' | 'due')}>
-              <SelectTrigger className="w-28 h-8 text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="created">Newest</SelectItem>
-                <SelectItem value="due">Due Date</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
 
