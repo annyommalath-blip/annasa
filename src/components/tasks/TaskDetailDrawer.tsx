@@ -27,6 +27,27 @@ import { PriorityBadge } from './PriorityBadge';
 import { TaskStatus, TaskPriority } from '@/types';
 import { toast } from '@/hooks/use-toast';
 
+function renderTextWithLinks(text: string) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  return parts.map((part, i) =>
+    urlRegex.test(part) ? (
+      <a
+        key={i}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-primary underline hover:text-primary/80"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {part}
+      </a>
+    ) : (
+      <span key={i}>{part}</span>
+    )
+  );
+}
+
 interface TaskDetailDrawerProps {
   taskId: string | null;
   open: boolean;
