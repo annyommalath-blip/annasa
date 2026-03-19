@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useCreateTask } from '@/hooks/useTasks';
 import { useProjects, useCreateProject } from '@/hooks/useProjects';
-import { useTeams } from '@/hooks/useTeam';
+import { useTeams, useTeamMembers } from '@/hooks/useTeam';
 import { useProfiles } from '@/hooks/useProfiles';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -32,6 +32,26 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
   const { data: profiles } = useProfiles();
   const createTask = useCreateTask();
   const createProject = useCreateProject();
+
+  // Get team_id for selected project
+  const selectedProject = projects?.find(p => p.id === projectId);
+  const selectedTeamId = selectedProject?.team_id;
+  const { data: teamMembers } = useTeamMembers(selectedTeamId);
+
+  // Build assignee options: team members with profiles, or just yourself
+  const assigneeOptions = React.useMemo(() => {
+    if (!selectedTeamId || !teamMembers || !profiles) {
+      return user ? [{ user_id: user.id, full_name: 'Yourself' }] : [];
+    }
+    const memberIds = teamMembers.map(m => m.user_id);
+    const options = profiles
+      .filter(p => memberIds.includes(p.user_id))
+      .map(p => ({
+        user_id: p.user_id,
+        full_name: p.user_id === user?.id ? `${p.full_name} (You)` : p.full_name,
+      }));
+    return options.length > 0 ? options : user ? [{ user_id: user.id, full_name: 'Yourself' }] : [];
+  }, [selectedTeamId, teamMembers, profiles, user]);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -170,10 +190,10 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
             {/* Assignee */}
             <div className="space-y-2">
               <Label>Assignee</Label>
-              <Select value={assigneeId} onValueChange={setAssigneeId}>
-                <SelectTrigger><SelectValue placeholder="Assign to..." /></SelectTrigger>
+              <Select value={assigneeId} onValueChange={setAssigneeId} disabled={!projectId && !showNewProject}>
+                <SelectTrigger><SelectValue placeholder={projectId || showNewProject ? "Assign to..." : "Select a project first"} /></SelectTrigger>
                 <SelectContent>
-                  {profiles?.map(p => (
+                  {assigneeOptions.map(p => (
                     <SelectItem key={p.user_id} value={p.user_id}>{p.full_name}</SelectItem>
                   ))}
                 </SelectContent>
