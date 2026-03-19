@@ -500,7 +500,7 @@ function SortableSectionHeader({
       )}
       <span className="text-xs text-muted-foreground ml-1">{taskCount}</span>
       <div className="flex-1" />
-      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+      <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground">
