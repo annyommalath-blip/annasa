@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useProject } from '@/hooks/useProjects';
 import { useTasks, useUpdateTask } from '@/hooks/useTasks';
@@ -41,6 +41,7 @@ const SECTION_PREFIX = 'section::';
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: project, isLoading: projectLoading } = useProject(id);
   const { data: tasks, isLoading: tasksLoading } = useTasks(id);
   const { data: profiles } = useProfiles();
@@ -50,7 +51,7 @@ export default function ProjectDetail() {
   const deleteSection = useDeleteSection();
   const updateTask = useUpdateTask();
 
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(searchParams.get('task'));
   const [showCreate, setShowCreate] = useState(false);
   const [addingSectionAt, setAddingSectionAt] = useState<number | null>(null);
   const [newSectionName, setNewSectionName] = useState('');
@@ -382,7 +383,7 @@ export default function ProjectDetail() {
         </div>
       </div>
 
-      <TaskDetailDrawer taskId={selectedTaskId} open={!!selectedTaskId} onClose={() => setSelectedTaskId(null)} />
+      <TaskDetailDrawer taskId={selectedTaskId} open={!!selectedTaskId} onClose={() => { setSelectedTaskId(null); searchParams.delete('task'); setSearchParams(searchParams, { replace: true }); }} />
       <CreateTaskDialog open={showCreate} onOpenChange={setShowCreate} defaultProjectId={id} />
       {id && <InviteDialog open={showInvite} onOpenChange={setShowInvite} projectId={id} />}
     </AppLayout>

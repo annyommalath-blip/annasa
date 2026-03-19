@@ -3,11 +3,37 @@ import { useNotifications, useMarkNotificationRead } from '@/hooks/useNotificati
 import { Bell, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Inbox() {
   const { data: notifications, isLoading } = useNotifications();
   const markRead = useMarkNotificationRead();
   const navigate = useNavigate();
+
+  const handleNotificationClick = async (n: any) => {
+    if (!n.read) markRead.mutate(n.id);
+
+    if (n.type === 'invitation') {
+      navigate('/dashboard');
+      return;
+    }
+
+    // For mentions and task-related notifications, navigate to the task in its project
+    if (n.task_id) {
+      const { data: task } = await supabase
+        .from('tasks')
+        .select('project_id')
+        .eq('id', n.task_id)
+        .single();
+
+      if (task?.project_id) {
+        navigate(`/projects/${task.project_id}?task=${n.task_id}`);
+        return;
+      }
+    }
+
+    navigate('/my-tasks');
+  };
 
   return (
     <AppLayout>
@@ -34,12 +60,7 @@ export default function Inbox() {
               <div
                 key={n.id}
                 className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-muted/30 transition-colors ${!n.read ? 'bg-primary/5' : ''}`}
-                onClick={() => {
-                  if (!n.read) markRead.mutate(n.id);
-                  if (n.type === 'invitation') navigate('/dashboard');
-                  else if (n.type === 'mention' && n.task_id) navigate('/my-tasks');
-                  else if (n.task_id) navigate('/my-tasks');
-                }}
+                onClick={() => handleNotificationClick(n)}
               >
                 <div className={`w-2 h-2 rounded-full flex-shrink-0 ${n.read ? 'bg-transparent' : 'bg-primary'}`} />
                 <div className="flex-1 min-w-0">
