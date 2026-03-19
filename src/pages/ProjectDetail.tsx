@@ -9,7 +9,14 @@ import { StatusBadge } from '@/components/tasks/StatusBadge';
 import { PriorityBadge } from '@/components/tasks/PriorityBadge';
 import { TaskDetailDrawer } from '@/components/tasks/TaskDetailDrawer';
 import { CreateTaskDialog } from '@/components/tasks/CreateTaskDialog';
-import { Plus, Globe, Lock, GripVertical, ChevronDown, ChevronRight, Trash2, Pencil, UserPlus } from 'lucide-react';
+import { Plus, Globe, Lock, GripVertical, ChevronDown, ChevronRight, Trash2, Pencil, UserPlus, MoreHorizontal, ArrowUp, ArrowDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
