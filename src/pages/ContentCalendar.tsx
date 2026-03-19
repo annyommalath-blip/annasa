@@ -61,6 +61,30 @@ export default function ContentCalendar() {
 
   const getProjectName = (id: string) => projects?.find(p => p.id === id)?.name ?? '';
 
+  // Deterministic color palette for projects
+  const projectColorMap = useMemo(() => {
+    const palette = [
+      { bg: 'bg-blue-100 dark:bg-blue-950/40', text: 'text-blue-700 dark:text-blue-300', border: 'border-blue-200 dark:border-blue-800' },
+      { bg: 'bg-emerald-100 dark:bg-emerald-950/40', text: 'text-emerald-700 dark:text-emerald-300', border: 'border-emerald-200 dark:border-emerald-800' },
+      { bg: 'bg-violet-100 dark:bg-violet-950/40', text: 'text-violet-700 dark:text-violet-300', border: 'border-violet-200 dark:border-violet-800' },
+      { bg: 'bg-amber-100 dark:bg-amber-950/40', text: 'text-amber-700 dark:text-amber-300', border: 'border-amber-200 dark:border-amber-800' },
+      { bg: 'bg-rose-100 dark:bg-rose-950/40', text: 'text-rose-700 dark:text-rose-300', border: 'border-rose-200 dark:border-rose-800' },
+      { bg: 'bg-cyan-100 dark:bg-cyan-950/40', text: 'text-cyan-700 dark:text-cyan-300', border: 'border-cyan-200 dark:border-cyan-800' },
+      { bg: 'bg-orange-100 dark:bg-orange-950/40', text: 'text-orange-700 dark:text-orange-300', border: 'border-orange-200 dark:border-orange-800' },
+      { bg: 'bg-fuchsia-100 dark:bg-fuchsia-950/40', text: 'text-fuchsia-700 dark:text-fuchsia-300', border: 'border-fuchsia-200 dark:border-fuchsia-800' },
+    ];
+    const map: Record<string, typeof palette[0]> = {};
+    const projectIds = [...new Set((tasks || []).map(t => t.project_id))];
+    projectIds.forEach((id, i) => {
+      map[id] = palette[i % palette.length];
+    });
+    return map;
+  }, [tasks]);
+
+  const getProjectColor = (projectId: string) => {
+    return projectColorMap[projectId] || { bg: 'bg-muted', text: 'text-muted-foreground', border: 'border-border' };
+  };
+
   // Aggregate platform counts for a day
   const getDayPlatformCounts = (dayTasks: Task[]) => {
     const counts: Record<string, number> = {};
@@ -70,17 +94,6 @@ export default function ContentCalendar() {
       });
     });
     return counts;
-  };
-
-  // Get status color for task label
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case 'scheduled': return 'bg-accent/20 text-accent-foreground border-accent/30';
-      case 'posted': return 'bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800';
-      case 'done': return 'bg-primary/10 text-primary border-primary/20';
-      case 'failed': return 'bg-destructive/10 text-destructive border-destructive/20';
-      default: return 'bg-muted text-muted-foreground border-border';
-    }
   };
 
   return (
