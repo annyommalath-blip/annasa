@@ -37,7 +37,8 @@ export default function Inbox() {
                 onClick={() => {
                   if (!n.read) markRead.mutate(n.id);
                   if (n.type === 'invitation') navigate('/dashboard');
-                  else if (n.task_id) navigate(`/my-tasks`);
+                  else if (n.type === 'mention' && n.task_id) navigate('/my-tasks');
+                  else if (n.task_id) navigate('/my-tasks');
                 }}
               >
                 <div className={`w-2 h-2 rounded-full flex-shrink-0 ${n.read ? 'bg-transparent' : 'bg-primary'}`} />
