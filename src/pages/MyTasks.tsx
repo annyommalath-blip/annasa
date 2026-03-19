@@ -19,7 +19,6 @@ export default function MyTasks() {
   const navigate = useNavigate();
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('all');
-  const [sortBy, setSortBy] = useState<'created' | 'due'>('created');
 
   const getProjectName = (id: string) => projects?.find(p => p.id === id)?.name ?? '';
   const getProfileName = (id: string | null) => profiles?.find(p => p.user_id === id)?.full_name ?? '';
@@ -30,13 +29,18 @@ export default function MyTasks() {
 
   let filteredTasks = tasks || [];
   if (statusFilter !== 'all') filteredTasks = filteredTasks.filter(t => t.status === statusFilter);
-  if (sortBy === 'due') {
-    filteredTasks = [...filteredTasks].sort((a, b) => {
-      if (!a.due_at) return 1;
-      if (!b.due_at) return -1;
-      return new Date(a.due_at).getTime() - new Date(b.due_at).getTime();
-    });
-  }
+
+  // Sort: non-done tasks first (by due date asc), then done tasks at bottom (by due date asc)
+  filteredTasks = [...filteredTasks].sort((a, b) => {
+    const aDone = a.status === 'done' ? 1 : 0;
+    const bDone = b.status === 'done' ? 1 : 0;
+    if (aDone !== bDone) return aDone - bDone;
+    // Within same group, sort by due date (earliest first, no-date last)
+    if (!a.due_at && !b.due_at) return 0;
+    if (!a.due_at) return 1;
+    if (!b.due_at) return -1;
+    return new Date(a.due_at).getTime() - new Date(b.due_at).getTime();
+  });
 
   return (
     <AppLayout>
@@ -57,13 +61,6 @@ export default function MyTasks() {
                 <SelectItem value="not_started">Not Started</SelectItem>
                 <SelectItem value="in_progress">In Progress</SelectItem>
                 <SelectItem value="done">Done</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={sortBy} onValueChange={v => setSortBy(v as 'created' | 'due')}>
-              <SelectTrigger className="w-28 h-8 text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="created">Newest</SelectItem>
-                <SelectItem value="due">Due Date</SelectItem>
               </SelectContent>
             </Select>
           </div>
