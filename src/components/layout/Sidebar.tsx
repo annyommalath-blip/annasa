@@ -20,7 +20,7 @@ interface SidebarProps {
 
 export function Sidebar({ onAddTask }: SidebarProps) {
   const location = useLocation();
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, user } = useAuth();
   const { data: notifications } = useNotifications();
   const { data: projects } = useProjects();
   const unreadCount = notifications?.filter(n => !n.read).length || 0;
