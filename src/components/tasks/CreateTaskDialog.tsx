@@ -33,6 +33,26 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
   const createTask = useCreateTask();
   const createProject = useCreateProject();
 
+  // Get team_id for selected project
+  const selectedProject = projects?.find(p => p.id === projectId);
+  const selectedTeamId = selectedProject?.team_id;
+  const { data: teamMembers } = useTeamMembers(selectedTeamId);
+
+  // Build assignee options: team members with profiles, or just yourself
+  const assigneeOptions = React.useMemo(() => {
+    if (!selectedTeamId || !teamMembers || !profiles) {
+      return user ? [{ user_id: user.id, full_name: 'Yourself' }] : [];
+    }
+    const memberIds = teamMembers.map(m => m.user_id);
+    const options = profiles
+      .filter(p => memberIds.includes(p.user_id))
+      .map(p => ({
+        user_id: p.user_id,
+        full_name: p.user_id === user?.id ? `${p.full_name} (You)` : p.full_name,
+      }));
+    return options.length > 0 ? options : user ? [{ user_id: user.id, full_name: 'Yourself' }] : [];
+  }, [selectedTeamId, teamMembers, profiles, user]);
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('medium');
