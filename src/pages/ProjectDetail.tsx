@@ -330,6 +330,10 @@ export default function ProjectDetail() {
                             onFinishEdit={() => handleRenameSection(sectionId)}
                             onCancelEdit={() => setEditingSectionId(null)}
                             onDelete={() => handleDeleteSection(sectionId)}
+                            onMoveUp={() => handleMoveSection(sectionId, 'up')}
+                            onMoveDown={() => handleMoveSection(sectionId, 'down')}
+                            canMoveUp={sections ? sections.findIndex(s => s.id === sectionId) > 0 : false}
+                            canMoveDown={sections ? sections.findIndex(s => s.id === sectionId) < sections.length - 1 : false}
                           />
                         )}
 
