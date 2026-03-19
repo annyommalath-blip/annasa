@@ -493,6 +493,7 @@ function SortableSectionHeader({
           onKeyDown={e => { if (e.key === 'Enter') onFinishEdit(); if (e.key === 'Escape') onCancelEdit(); }}
           className="h-7 text-sm font-semibold w-60 border-none shadow-none bg-transparent focus-visible:ring-1"
           autoFocus
+          onFocus={e => e.target.select()}
         />
       ) : (
         <span className="text-sm font-semibold text-foreground">{name}</span>
