@@ -172,22 +172,25 @@ export default function ContentCalendar() {
 
                   {/* Task labels with content name */}
                   <div className="space-y-1">
-                    {dayTasks.slice(0, 3).map(task => (
-                      <button
-                        key={task.id}
-                        onClick={() => setSelectedTask(task)}
-                        className={cn(
-                          "w-full text-left px-1.5 py-1 rounded text-[10px] font-medium border transition-colors truncate flex items-center gap-1 hover:opacity-80",
-                          getStatusStyle(task.status)
-                        )}
-                        title={`${task.title} — ${task.status}`}
-                      >
-                        {task.asset_urls && task.asset_urls.length > 0 && (
-                          <LinkIcon className="w-2.5 h-2.5 shrink-0 opacity-60" />
-                        )}
-                        <span className="truncate">{task.title}</span>
-                      </button>
-                    ))}
+                    {dayTasks.slice(0, 3).map(task => {
+                      const color = getProjectColor(task.project_id);
+                      return (
+                        <button
+                          key={task.id}
+                          onClick={() => setSelectedTask(task)}
+                          className={cn(
+                            "w-full text-left px-1.5 py-1 rounded text-[10px] font-medium border transition-colors truncate flex items-center gap-1 hover:opacity-80",
+                            color.bg, color.text, color.border
+                          )}
+                          title={`${task.title} — ${getProjectName(task.project_id)}`}
+                        >
+                          {task.asset_urls && task.asset_urls.length > 0 && (
+                            <LinkIcon className="w-2.5 h-2.5 shrink-0 opacity-60" />
+                          )}
+                          <span className="truncate">{task.title}</span>
+                        </button>
+                      );
+                    })}
                     {dayTasks.length > 3 && (
                       <span className="text-[10px] text-muted-foreground px-1.5">
                         +{dayTasks.length - 3} more
