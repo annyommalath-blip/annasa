@@ -523,7 +523,6 @@ function SortableSectionHeader({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      </div>
     </div>
   );
 }
