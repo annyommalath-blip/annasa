@@ -187,7 +187,7 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
             {showNewProject ? (
               <Input value={newProjectName} onChange={e => setNewProjectName(e.target.value)} placeholder="New project name" />
             ) : (
-              <Select value={projectId} onValueChange={setProjectId}>
+              <Select value={projectId} onValueChange={setProjectId} disabled={!!defaultProjectId}>
                 <SelectTrigger><SelectValue placeholder="Select project" /></SelectTrigger>
                 <SelectContent>
                   {projects?.map(p => (
