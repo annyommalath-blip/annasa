@@ -195,8 +195,8 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
             {/* Assignee */}
             <div className="space-y-2">
               <Label>Assignee</Label>
-              <Select value={assigneeId} onValueChange={setAssigneeId} disabled={!projectId && !showNewProject}>
-                <SelectTrigger><SelectValue placeholder={projectId || showNewProject ? "Assign to..." : "Select a project first"} /></SelectTrigger>
+              <Select value={assigneeId} onValueChange={setAssigneeId}>
+                <SelectTrigger><SelectValue placeholder="Assign to..." /></SelectTrigger>
                 <SelectContent>
                   {assigneeOptions.map(p => (
                     <SelectItem key={p.user_id} value={p.user_id}>{p.full_name}</SelectItem>
