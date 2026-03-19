@@ -424,7 +424,7 @@ export function TaskDetailDrawer({ taskId, open, onClose }: TaskDetailDrawerProp
                 </div>
               </div>
             ) : (
-              <p
+              <div
                 className={cn(
                   "text-sm min-h-[3rem] whitespace-pre-wrap",
                   task.description ? "text-foreground/80" : "text-muted-foreground italic",
@@ -432,8 +432,8 @@ export function TaskDetailDrawer({ taskId, open, onClose }: TaskDetailDrawerProp
                 )}
                 onClick={() => canEdit && setEditingDescription(true)}
               >
-                {task.description || 'What is this task about?'}
-              </p>
+                {task.description ? renderTextWithLinks(task.description) : 'What is this task about?'}
+              </div>
             )}
           </div>
 
