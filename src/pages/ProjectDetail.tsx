@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useProject } from '@/hooks/useProjects';
-import { useTasks, useUpdateTask } from '@/hooks/useTasks';
+import { useTasks, useUpdateTask, useDeleteTask } from '@/hooks/useTasks';
 import { useProfiles } from '@/hooks/useProfiles';
 import { useSections, useCreateSection, useUpdateSection, useDeleteSection } from '@/hooks/useSections';
 import { StatusBadge } from '@/components/tasks/StatusBadge';
