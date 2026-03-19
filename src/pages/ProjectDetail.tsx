@@ -392,7 +392,7 @@ export default function ProjectDetail() {
 
               <DragOverlay>
                 {activeTask && (
-                  <div className="grid grid-cols-[28px_1fr_100px_100px_80px_100px_80px] gap-0 px-4 py-3 bg-card border border-primary/30 rounded-md shadow-lg">
+                  <div className="grid grid-cols-[28px_1fr_100px_100px_80px_100px_80px_36px] gap-0 px-4 py-3 bg-card border border-primary/30 rounded-md shadow-lg">
                     <div className="flex items-center"><GripVertical className="w-4 h-4 text-muted-foreground" /></div>
                     <p className="text-sm font-medium text-foreground truncate">{activeTask.title}</p>
                     <div className="flex items-center">
