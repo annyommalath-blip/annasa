@@ -23,13 +23,38 @@ export function useMyTasks() {
   return useQuery({
     queryKey: ['my-tasks', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Get tasks where user is owner or creator
+      const { data: ownedTasks, error: ownedErr } = await supabase
         .from('tasks')
         .select('*')
         .or(`owner_id.eq.${user!.id},created_by.eq.${user!.id}`)
         .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data as Task[];
+      if (ownedErr) throw ownedErr;
+
+      // Get tasks where user is a collaborator (e.g. mentioned via @)
+      const { data: collabRows, error: collabErr } = await supabase
+        .from('task_collaborators')
+        .select('task_id')
+        .eq('user_id', user!.id);
+      if (collabErr) throw collabErr;
+
+      const ownedIds = new Set((ownedTasks || []).map(t => t.id));
+      const collabTaskIds = (collabRows || [])
+        .map(r => r.task_id)
+        .filter(id => !ownedIds.has(id));
+
+      let collabTasks: Task[] = [];
+      if (collabTaskIds.length > 0) {
+        const { data, error } = await supabase
+          .from('tasks')
+          .select('*')
+          .in('id', collabTaskIds)
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        collabTasks = (data || []) as Task[];
+      }
+
+      return [...(ownedTasks as Task[]), ...collabTasks];
     },
     enabled: !!user,
   });
