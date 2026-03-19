@@ -13,7 +13,7 @@ export default function Inbox() {
     <AppLayout>
       <div className="max-w-3xl">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Inbox</h1>
+          <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {notifications?.filter(n => !n.read).length || 0} unread notifications
           </p>

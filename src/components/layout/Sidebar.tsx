@@ -80,16 +80,16 @@ export function Sidebar({ onAddTask }: SidebarProps) {
           );
         })}
 
-        {/* Inbox */}
+        {/* Notifications */}
         <Link
-          to="/inbox"
+          to="/notifications"
           className={cn(
             "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors relative",
-            location.pathname === '/inbox' ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            location.pathname === '/notifications' ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
           )}
         >
           <Bell className="w-4 h-4" />
-          Inbox
+          Notifications
           {unreadCount > 0 && (
             <span className="ml-auto bg-accent text-accent-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
               {unreadCount}
