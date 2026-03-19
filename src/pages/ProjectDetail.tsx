@@ -535,12 +535,14 @@ function SortableTaskRow({
   getInitials,
   getProfileName,
   onSelect,
+  onDelete,
   onNavigateProject,
 }: {
   task: Task;
   getInitials: (id: string | null) => string;
   getProfileName: (id: string | null) => string;
   onSelect: () => void;
+  onDelete: () => void;
   onNavigateProject: (e: React.MouseEvent) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
@@ -555,7 +557,7 @@ function SortableTaskRow({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "grid grid-cols-[28px_1fr_100px_100px_80px_100px_80px] gap-0 px-4 py-3 border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer group",
+        "grid grid-cols-[28px_1fr_100px_100px_80px_100px_80px_36px] gap-0 px-4 py-3 border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer group",
         isDragging && "opacity-30"
       )}
       onClick={onSelect}
@@ -576,6 +578,24 @@ function SortableTaskRow({
       </div>
       <div className="flex items-center"><StatusBadge status={task.status} /></div>
       <div className="flex items-center"><PriorityBadge priority={task.priority} /></div>
+      <div className="flex items-center opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground">
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-36">
+            <DropdownMenuItem onClick={onSelect}>
+              <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
+              <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   );
 }
