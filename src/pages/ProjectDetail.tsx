@@ -57,7 +57,7 @@ export default function ProjectDetail() {
   const updateSection = useUpdateSection();
   const deleteSection = useDeleteSection();
   const updateTask = useUpdateTask();
-
+  const deleteTask = useDeleteTask();
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(searchParams.get('task'));
 
   // Sync selectedTaskId when navigating from notifications with ?task= param
