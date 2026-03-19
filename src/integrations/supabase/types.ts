@@ -560,6 +560,7 @@ export type Database = {
         Args: { _name: string; _user_id: string }
         Returns: string
       }
+      get_current_user_email: { Args: never; Returns: string }
       get_user_team_ids: { Args: { _user_id: string }; Returns: string[] }
       has_role: {
         Args: {
