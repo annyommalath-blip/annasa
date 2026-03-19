@@ -552,6 +552,10 @@ export type Database = {
         Args: { _invitation_id: string }
         Returns: undefined
       }
+      create_invitation_notification: {
+        Args: { _email: string; _invited_by: string; _project_id: string }
+        Returns: undefined
+      }
       create_team_with_member: {
         Args: { _name: string; _user_id: string }
         Returns: string

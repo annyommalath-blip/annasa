@@ -36,7 +36,8 @@ export default function Inbox() {
                 className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-muted/30 transition-colors ${!n.read ? 'bg-primary/5' : ''}`}
                 onClick={() => {
                   if (!n.read) markRead.mutate(n.id);
-                  if (n.task_id) navigate(`/my-tasks`);
+                  if (n.type === 'invitation') navigate('/dashboard');
+                  else if (n.task_id) navigate(`/my-tasks`);
                 }}
               >
                 <div className={`w-2 h-2 rounded-full flex-shrink-0 ${n.read ? 'bg-transparent' : 'bg-primary'}`} />

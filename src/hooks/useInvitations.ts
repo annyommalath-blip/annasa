@@ -46,6 +46,14 @@ export function useCreateInvitation() {
         .select()
         .single();
       if (error) throw error;
+
+      // Create in-app notification for the invited user
+      await supabase.rpc('create_invitation_notification', {
+        _project_id: projectId,
+        _email: email,
+        _invited_by: invitedBy,
+      });
+
       return data;
     },
     onSuccess: (_, vars) => {
