@@ -33,6 +33,19 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
   const createTask = useCreateTask();
   const createProject = useCreateProject();
 
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState<TaskPriority>('medium');
+  const [projectId, setProjectId] = useState(defaultProjectId || '');
+  const [startDate, setStartDate] = useState<Date>();
+  const [dueDate, setDueDate] = useState<Date>();
+  const [postingDate, setPostingDate] = useState<Date>();
+  const [visibility, setVisibility] = useState<Visibility>('public');
+  const [assigneeId, setAssigneeId] = useState('');
+  const [newProjectName, setNewProjectName] = useState('');
+  const [showNewProject, setShowNewProject] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+
   // Get team_id for selected project
   const selectedProject = projects?.find(p => p.id === projectId);
   const selectedTeamId = selectedProject?.team_id;
@@ -52,19 +65,6 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
       }));
     return options.length > 0 ? options : user ? [{ user_id: user.id, full_name: 'Yourself' }] : [];
   }, [selectedTeamId, teamMembers, profiles, user]);
-
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState<TaskPriority>('medium');
-  const [projectId, setProjectId] = useState(defaultProjectId || '');
-  const [startDate, setStartDate] = useState<Date>();
-  const [dueDate, setDueDate] = useState<Date>();
-  const [postingDate, setPostingDate] = useState<Date>();
-  const [visibility, setVisibility] = useState<Visibility>('public');
-  const [assigneeId, setAssigneeId] = useState('');
-  const [newProjectName, setNewProjectName] = useState('');
-  const [showNewProject, setShowNewProject] = useState(false);
-  const [files, setFiles] = useState<File[]>([]);
 
   const reset = () => {
     setTitle('');
