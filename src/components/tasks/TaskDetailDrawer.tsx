@@ -134,10 +134,13 @@ export function TaskDetailDrawer({ taskId, open, onClose }: TaskDetailDrawerProp
 
   const handleCommentChange = (value: string) => {
     setNewComment(value);
-    const lastAt = value.lastIndexOf('@');
+    const cursorPos = commentRef.current?.selectionStart ?? value.length;
+    const textUpToCursor = value.slice(0, cursorPos);
+    const lastAt = textUpToCursor.lastIndexOf('@');
     if (lastAt !== -1) {
-      const afterAt = value.slice(lastAt + 1);
-      if (!afterAt.includes(' ') && afterAt.length < 30) {
+      const afterAt = textUpToCursor.slice(lastAt + 1);
+      // Allow spaces in mention search (for multi-word names), but cap length
+      if (afterAt.length < 50 && !afterAt.includes('\n')) {
         setMentionSearch(afterAt);
         setMentionIndex(0);
         return;
