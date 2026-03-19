@@ -37,6 +37,13 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('medium');
   const [projectId, setProjectId] = useState(defaultProjectId || '');
+
+  // Sync projectId when defaultProjectId changes (e.g. navigating between projects)
+  useEffect(() => {
+    if (defaultProjectId) {
+      setProjectId(defaultProjectId);
+    }
+  }, [defaultProjectId]);
   const [startDate, setStartDate] = useState<Date>();
   const [dueDate, setDueDate] = useState<Date>();
   const [postingDate, setPostingDate] = useState<Date>();
