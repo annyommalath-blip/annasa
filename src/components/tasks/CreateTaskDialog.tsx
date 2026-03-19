@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +37,13 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('medium');
   const [projectId, setProjectId] = useState(defaultProjectId || '');
+
+  // Sync projectId when defaultProjectId changes (e.g. navigating between projects)
+  useEffect(() => {
+    if (defaultProjectId) {
+      setProjectId(defaultProjectId);
+    }
+  }, [defaultProjectId]);
   const [startDate, setStartDate] = useState<Date>();
   const [dueDate, setDueDate] = useState<Date>();
   const [postingDate, setPostingDate] = useState<Date>();
@@ -180,7 +187,7 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
             {showNewProject ? (
               <Input value={newProjectName} onChange={e => setNewProjectName(e.target.value)} placeholder="New project name" />
             ) : (
-              <Select value={projectId} onValueChange={setProjectId}>
+              <Select value={projectId} onValueChange={setProjectId} disabled={!!defaultProjectId}>
                 <SelectTrigger><SelectValue placeholder="Select project" /></SelectTrigger>
                 <SelectContent>
                   {projects?.map(p => (
