@@ -383,7 +383,7 @@ export default function ProjectDetail() {
         </div>
       </div>
 
-      <TaskDetailDrawer taskId={selectedTaskId} open={!!selectedTaskId} onClose={() => setSelectedTaskId(null)} />
+      <TaskDetailDrawer taskId={selectedTaskId} open={!!selectedTaskId} onClose={() => { setSelectedTaskId(null); searchParams.delete('task'); setSearchParams(searchParams, { replace: true }); }} />
       <CreateTaskDialog open={showCreate} onOpenChange={setShowCreate} defaultProjectId={id} />
       {id && <InviteDialog open={showInvite} onOpenChange={setShowInvite} projectId={id} />}
     </AppLayout>
