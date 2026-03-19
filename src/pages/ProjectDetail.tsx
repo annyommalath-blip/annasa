@@ -287,7 +287,7 @@ export default function ProjectDetail() {
         </div>
 
         <div className="bg-card border border-border rounded-lg overflow-hidden">
-          <div className="grid grid-cols-[28px_1fr_100px_100px_80px_100px_80px] gap-0 px-4 py-2.5 bg-muted/50 border-b border-border text-xs font-medium text-muted-foreground">
+          <div className="grid grid-cols-[28px_1fr_100px_100px_80px_100px_80px_36px] gap-0 px-4 py-2.5 bg-muted/50 border-b border-border text-xs font-medium text-muted-foreground">
             <span></span>
             <span>Task</span>
             <span>Assignee</span>
@@ -295,6 +295,7 @@ export default function ProjectDetail() {
             <span className="text-center">Visibility</span>
             <span>Status</span>
             <span>Priority</span>
+            <span></span>
           </div>
 
           {tasksLoading ? (
