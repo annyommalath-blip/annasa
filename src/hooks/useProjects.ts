@@ -33,13 +33,31 @@ export function useCreateProject() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ name, description, teamId }: { name: string; description?: string; teamId: string }) => {
-      const { data, error } = await supabase
+      const projectId = crypto.randomUUID();
+      const trimmedName = name.trim();
+      const safeDescription = description || '';
+
+      const { error } = await supabase
         .from('projects')
-        .insert({ name, description: description || '', team_id: teamId, created_by: user!.id })
-        .select()
-        .single();
+        .insert({
+          id: projectId,
+          name: trimmedName,
+          description: safeDescription,
+          team_id: teamId,
+          created_by: user!.id,
+        });
+
       if (error) throw error;
-      return data as Project;
+
+      return {
+        id: projectId,
+        name: trimmedName,
+        description: safeDescription,
+        team_id: teamId,
+        created_by: user!.id,
+        tags: [],
+        created_at: new Date().toISOString(),
+      } as Project;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
   });
