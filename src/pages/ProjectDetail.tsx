@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useProject } from '@/hooks/useProjects';
-import { useTasks, useUpdateTask } from '@/hooks/useTasks';
+import { useTasks, useUpdateTask, useDeleteTask } from '@/hooks/useTasks';
 import { useProfiles } from '@/hooks/useProfiles';
 import { useSections, useCreateSection, useUpdateSection, useDeleteSection } from '@/hooks/useSections';
 import { StatusBadge } from '@/components/tasks/StatusBadge';
@@ -57,7 +57,7 @@ export default function ProjectDetail() {
   const updateSection = useUpdateSection();
   const deleteSection = useDeleteSection();
   const updateTask = useUpdateTask();
-
+  const deleteTask = useDeleteTask();
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(searchParams.get('task'));
 
   // Sync selectedTaskId when navigating from notifications with ?task= param
@@ -287,7 +287,7 @@ export default function ProjectDetail() {
         </div>
 
         <div className="bg-card border border-border rounded-lg overflow-hidden">
-          <div className="grid grid-cols-[28px_1fr_100px_100px_80px_100px_80px] gap-0 px-4 py-2.5 bg-muted/50 border-b border-border text-xs font-medium text-muted-foreground">
+          <div className="grid grid-cols-[28px_1fr_100px_100px_80px_100px_80px_36px] gap-0 px-4 py-2.5 bg-muted/50 border-b border-border text-xs font-medium text-muted-foreground">
             <span></span>
             <span>Task</span>
             <span>Assignee</span>
@@ -295,6 +295,7 @@ export default function ProjectDetail() {
             <span className="text-center">Visibility</span>
             <span>Status</span>
             <span>Priority</span>
+            <span></span>
           </div>
 
           {tasksLoading ? (
@@ -351,6 +352,7 @@ export default function ProjectDetail() {
                                   getInitials={getInitials}
                                   getProfileName={getProfileName}
                                   onSelect={() => setSelectedTaskId(task.id)}
+                                  onDelete={() => deleteTask.mutate(task.id)}
                                   onNavigateProject={e => { e.stopPropagation(); navigate(`/projects/${task.project_id}`); }}
                                 />
                               ))
@@ -390,7 +392,7 @@ export default function ProjectDetail() {
 
               <DragOverlay>
                 {activeTask && (
-                  <div className="grid grid-cols-[28px_1fr_100px_100px_80px_100px_80px] gap-0 px-4 py-3 bg-card border border-primary/30 rounded-md shadow-lg">
+                  <div className="grid grid-cols-[28px_1fr_100px_100px_80px_100px_80px_36px] gap-0 px-4 py-3 bg-card border border-primary/30 rounded-md shadow-lg">
                     <div className="flex items-center"><GripVertical className="w-4 h-4 text-muted-foreground" /></div>
                     <p className="text-sm font-medium text-foreground truncate">{activeTask.title}</p>
                     <div className="flex items-center">
@@ -534,12 +536,14 @@ function SortableTaskRow({
   getInitials,
   getProfileName,
   onSelect,
+  onDelete,
   onNavigateProject,
 }: {
   task: Task;
   getInitials: (id: string | null) => string;
   getProfileName: (id: string | null) => string;
   onSelect: () => void;
+  onDelete: () => void;
   onNavigateProject: (e: React.MouseEvent) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
@@ -554,7 +558,7 @@ function SortableTaskRow({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "grid grid-cols-[28px_1fr_100px_100px_80px_100px_80px] gap-0 px-4 py-3 border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer group",
+        "grid grid-cols-[28px_1fr_100px_100px_80px_100px_80px_36px] gap-0 px-4 py-3 border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer group",
         isDragging && "opacity-30"
       )}
       onClick={onSelect}
@@ -575,6 +579,24 @@ function SortableTaskRow({
       </div>
       <div className="flex items-center"><StatusBadge status={task.status} /></div>
       <div className="flex items-center"><PriorityBadge priority={task.priority} /></div>
+      <div className="flex items-center opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground">
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-36">
+            <DropdownMenuItem onClick={onSelect}>
+              <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
+              <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   );
 }
