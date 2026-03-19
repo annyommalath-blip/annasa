@@ -51,11 +51,16 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
   const selectedTeamId = selectedProject?.team_id;
   const { data: teamMembers } = useTeamMembers(selectedTeamId);
 
-  // Build assignee options: team members with profiles, or just yourself
+  // Build assignee options: project members when project selected, otherwise just yourself
   const assigneeOptions = React.useMemo(() => {
-    if (!selectedTeamId || !teamMembers || !profiles) {
-      return user ? [{ user_id: user.id, full_name: 'Yourself' }] : [];
+    const selfOption = user
+      ? [{ user_id: user.id, full_name: profiles?.find(p => p.user_id === user.id)?.full_name ? `${profiles.find(p => p.user_id === user.id)!.full_name} (You)` : 'Yourself' }]
+      : [];
+
+    if (!projectId || !teamMembers || !profiles) {
+      return selfOption;
     }
+
     const memberIds = teamMembers.map(m => m.user_id);
     const options = profiles
       .filter(p => memberIds.includes(p.user_id))
@@ -63,8 +68,8 @@ export function CreateTaskDialog({ open, onOpenChange, defaultProjectId }: Creat
         user_id: p.user_id,
         full_name: p.user_id === user?.id ? `${p.full_name} (You)` : p.full_name,
       }));
-    return options.length > 0 ? options : user ? [{ user_id: user.id, full_name: 'Yourself' }] : [];
-  }, [selectedTeamId, teamMembers, profiles, user]);
+    return options.length > 0 ? options : selfOption;
+  }, [projectId, teamMembers, profiles, user]);
 
   const reset = () => {
     setTitle('');
