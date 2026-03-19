@@ -41,6 +41,7 @@ const SECTION_PREFIX = 'section::';
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: project, isLoading: projectLoading } = useProject(id);
   const { data: tasks, isLoading: tasksLoading } = useTasks(id);
   const { data: profiles } = useProfiles();
@@ -50,7 +51,7 @@ export default function ProjectDetail() {
   const deleteSection = useDeleteSection();
   const updateTask = useUpdateTask();
 
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(searchParams.get('task'));
   const [showCreate, setShowCreate] = useState(false);
   const [addingSectionAt, setAddingSectionAt] = useState<number | null>(null);
   const [newSectionName, setNewSectionName] = useState('');
