@@ -120,17 +120,38 @@ export function Sidebar({ onAddTask }: SidebarProps) {
 
       {/* User footer */}
       <div className="p-3 border-t border-border">
-        <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-sm">
-            {profile?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2) || '?'}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">{profile?.full_name || 'User'}</p>
-          </div>
-          <button onClick={signOut} className="text-muted-foreground hover:text-foreground transition-colors" title="Sign out">
-            <LogOut className="w-4 h-4" />
-          </button>
-        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="flex items-center gap-3 px-3 py-2 w-full rounded-lg hover:bg-muted transition-colors">
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-sm">
+                {profile?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2) || '?'}
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-sm font-medium text-foreground truncate">{profile?.full_name || 'User'}</p>
+              </div>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent side="top" align="start" className="w-56 p-1.5">
+            <div className="px-3 py-2 border-b border-border mb-1">
+              <p className="text-sm font-medium text-foreground truncate">{profile?.full_name || 'User'}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            </div>
+            <Link
+              to="/settings"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-foreground rounded-md hover:bg-muted transition-colors"
+            >
+              <Settings className="w-4 h-4" />
+              Settings
+            </Link>
+            <button
+              onClick={signOut}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-destructive rounded-md hover:bg-destructive/10 transition-colors w-full text-left"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign out
+            </button>
+          </PopoverContent>
+        </Popover>
       </div>
     </aside>
   );
