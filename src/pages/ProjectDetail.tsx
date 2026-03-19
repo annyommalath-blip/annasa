@@ -52,6 +52,14 @@ export default function ProjectDetail() {
   const updateTask = useUpdateTask();
 
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(searchParams.get('task'));
+
+  // Sync selectedTaskId when navigating from notifications with ?task= param
+  useEffect(() => {
+    const taskParam = searchParams.get('task');
+    if (taskParam && taskParam !== selectedTaskId) {
+      setSelectedTaskId(taskParam);
+    }
+  }, [searchParams]);
   const [showCreate, setShowCreate] = useState(false);
   const [addingSectionAt, setAddingSectionAt] = useState<number | null>(null);
   const [newSectionName, setNewSectionName] = useState('');
