@@ -1,10 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FolderKanban, Bell, CheckSquare, Plus, LogOut, Search, CalendarDays } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Bell, CheckSquare, Plus, LogOut, Search, CalendarDays, Settings, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useProjects } from '@/hooks/useProjects';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 const navItems = [
   { icon: CheckSquare, label: 'My Tasks', path: '/my-tasks' },
@@ -19,7 +20,7 @@ interface SidebarProps {
 
 export function Sidebar({ onAddTask }: SidebarProps) {
   const location = useLocation();
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, user } = useAuth();
   const { data: notifications } = useNotifications();
   const { data: projects } = useProjects();
   const unreadCount = notifications?.filter(n => !n.read).length || 0;
@@ -119,17 +120,38 @@ export function Sidebar({ onAddTask }: SidebarProps) {
 
       {/* User footer */}
       <div className="p-3 border-t border-border">
-        <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-sm">
-            {profile?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2) || '?'}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">{profile?.full_name || 'User'}</p>
-          </div>
-          <button onClick={signOut} className="text-muted-foreground hover:text-foreground transition-colors" title="Sign out">
-            <LogOut className="w-4 h-4" />
-          </button>
-        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="flex items-center gap-3 px-3 py-2 w-full rounded-lg hover:bg-muted transition-colors">
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-sm">
+                {profile?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2) || '?'}
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-sm font-medium text-foreground truncate">{profile?.full_name || 'User'}</p>
+              </div>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent side="top" align="start" className="w-56 p-1.5">
+            <div className="px-3 py-2 border-b border-border mb-1">
+              <p className="text-sm font-medium text-foreground truncate">{profile?.full_name || 'User'}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            </div>
+            <Link
+              to="/settings"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-foreground rounded-md hover:bg-muted transition-colors"
+            >
+              <Settings className="w-4 h-4" />
+              Settings
+            </Link>
+            <button
+              onClick={signOut}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-destructive rounded-md hover:bg-destructive/10 transition-colors w-full text-left"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign out
+            </button>
+          </PopoverContent>
+        </Popover>
       </div>
     </aside>
   );
