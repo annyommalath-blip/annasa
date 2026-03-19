@@ -529,8 +529,12 @@ export function TaskDetailDrawer({ taskId, open, onClose }: TaskDetailDrawerProp
           <div className="px-6 py-5">
             <div className="space-y-4">
               {comments?.map(c => {
-                // Parse @mentions in comment text
-                const parts = c.text.split(/(@\w[\w\s]*?\b)/g);
+                // Parse @mentions using known profile names for accurate full-name matching
+                const profileNames = (profiles || []).map(p => p.full_name).filter(Boolean).sort((a, b) => b.length - a.length);
+                const mentionRegex = profileNames.length > 0
+                  ? new RegExp(`(@(?:${profileNames.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')}))`, 'gi')
+                  : null;
+                const parts = mentionRegex ? c.text.split(mentionRegex) : [c.text];
                 return (
                   <div key={c.id} className="flex gap-3">
                     <Avatar className="h-7 w-7 flex-shrink-0 mt-0.5">
@@ -546,7 +550,7 @@ export function TaskDetailDrawer({ taskId, open, onClose }: TaskDetailDrawerProp
                       <p className="text-sm text-foreground/80 mt-0.5 whitespace-pre-wrap">
                         {parts.map((part, i) =>
                           part.startsWith('@') ? (
-                            <span key={i} className="text-primary font-medium">{part}</span>
+                            <span key={i} className="text-primary font-semibold cursor-pointer hover:underline">{part}</span>
                           ) : (
                             <span key={i}>{part}</span>
                           )
