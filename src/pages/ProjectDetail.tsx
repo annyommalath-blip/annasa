@@ -141,7 +141,23 @@ export default function ProjectDetail() {
 
   const handleDeleteSection = (sectionId: string) => {
     if (!id) return;
+    // Move tasks in this section to unsectioned before deleting
+    const sectionTasks = groupedTasks[sectionId] || [];
+    sectionTasks.forEach(t => {
+      updateTask.mutate({ id: t.id, section_id: null } as any);
+    });
     deleteSection.mutate({ id: sectionId, project_id: id });
+  };
+
+  const handleMoveSection = (sectionId: string, direction: 'up' | 'down') => {
+    if (!sections) return;
+    const idx = sections.findIndex(s => s.id === sectionId);
+    if (idx < 0) return;
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= sections.length) return;
+    // Swap positions
+    updateSection.mutate({ id: sections[idx].id, position: sections[targetIdx].position });
+    updateSection.mutate({ id: sections[targetIdx].id, position: sections[idx].position });
   };
 
   const toggleCollapse = (sectionId: string) => {
