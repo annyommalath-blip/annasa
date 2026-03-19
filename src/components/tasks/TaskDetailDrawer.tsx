@@ -27,6 +27,27 @@ import { PriorityBadge } from './PriorityBadge';
 import { TaskStatus, TaskPriority } from '@/types';
 import { toast } from '@/hooks/use-toast';
 
+function renderTextWithLinks(text: string) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  return parts.map((part, i) =>
+    urlRegex.test(part) ? (
+      <a
+        key={i}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-primary underline hover:text-primary/80"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {part}
+      </a>
+    ) : (
+      <span key={i}>{part}</span>
+    )
+  );
+}
+
 interface TaskDetailDrawerProps {
   taskId: string | null;
   open: boolean;
@@ -424,7 +445,7 @@ export function TaskDetailDrawer({ taskId, open, onClose }: TaskDetailDrawerProp
                 </div>
               </div>
             ) : (
-              <p
+              <div
                 className={cn(
                   "text-sm min-h-[3rem] whitespace-pre-wrap",
                   task.description ? "text-foreground/80" : "text-muted-foreground italic",
@@ -432,8 +453,8 @@ export function TaskDetailDrawer({ taskId, open, onClose }: TaskDetailDrawerProp
                 )}
                 onClick={() => canEdit && setEditingDescription(true)}
               >
-                {task.description || 'What is this task about?'}
-              </p>
+                {task.description ? renderTextWithLinks(task.description) : 'What is this task about?'}
+              </div>
             )}
           </div>
 
