@@ -9,7 +9,14 @@ import { StatusBadge } from '@/components/tasks/StatusBadge';
 import { PriorityBadge } from '@/components/tasks/PriorityBadge';
 import { TaskDetailDrawer } from '@/components/tasks/TaskDetailDrawer';
 import { CreateTaskDialog } from '@/components/tasks/CreateTaskDialog';
-import { Plus, Globe, Lock, GripVertical, ChevronDown, ChevronRight, Trash2, Pencil, UserPlus } from 'lucide-react';
+import { Plus, Globe, Lock, GripVertical, ChevronDown, ChevronRight, Trash2, Pencil, UserPlus, MoreHorizontal, ArrowUp, ArrowDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
@@ -134,7 +141,23 @@ export default function ProjectDetail() {
 
   const handleDeleteSection = (sectionId: string) => {
     if (!id) return;
+    // Move tasks in this section to unsectioned before deleting
+    const sectionTasks = groupedTasks[sectionId] || [];
+    sectionTasks.forEach(t => {
+      updateTask.mutate({ id: t.id, section_id: null } as any);
+    });
     deleteSection.mutate({ id: sectionId, project_id: id });
+  };
+
+  const handleMoveSection = (sectionId: string, direction: 'up' | 'down') => {
+    if (!sections) return;
+    const idx = sections.findIndex(s => s.id === sectionId);
+    if (idx < 0) return;
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= sections.length) return;
+    // Swap positions
+    updateSection.mutate({ id: sections[idx].id, position: sections[targetIdx].position });
+    updateSection.mutate({ id: sections[targetIdx].id, position: sections[idx].position });
   };
 
   const toggleCollapse = (sectionId: string) => {
@@ -307,6 +330,10 @@ export default function ProjectDetail() {
                             onFinishEdit={() => handleRenameSection(sectionId)}
                             onCancelEdit={() => setEditingSectionId(null)}
                             onDelete={() => handleDeleteSection(sectionId)}
+                            onMoveUp={() => handleMoveSection(sectionId, 'up')}
+                            onMoveDown={() => handleMoveSection(sectionId, 'down')}
+                            canMoveUp={sections ? sections.findIndex(s => s.id === sectionId) > 0 : false}
+                            canMoveDown={sections ? sections.findIndex(s => s.id === sectionId) < sections.length - 1 : false}
                           />
                         )}
 
@@ -412,6 +439,10 @@ function SortableSectionHeader({
   onFinishEdit,
   onCancelEdit,
   onDelete,
+  onMoveUp,
+  onMoveDown,
+  canMoveUp,
+  canMoveDown,
 }: {
   sectionId: string;
   name: string;
@@ -425,6 +456,10 @@ function SortableSectionHeader({
   onFinishEdit: () => void;
   onCancelEdit: () => void;
   onDelete: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: SECTION_PREFIX + sectionId,
@@ -465,12 +500,28 @@ function SortableSectionHeader({
       <span className="text-xs text-muted-foreground ml-1">{taskCount}</span>
       <div className="flex-1" />
       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-        <button onClick={onStartEdit} className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground">
-          <Pencil className="w-3.5 h-3.5" />
-        </button>
-        <button onClick={onDelete} className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive">
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground">
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem onClick={onStartEdit}>
+              <Pencil className="w-3.5 h-3.5 mr-2" /> Rename
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onMoveUp} disabled={!canMoveUp}>
+              <ArrowUp className="w-3.5 h-3.5 mr-2" /> Move up
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onMoveDown} disabled={!canMoveDown}>
+              <ArrowDown className="w-3.5 h-3.5 mr-2" /> Move down
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
+              <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
