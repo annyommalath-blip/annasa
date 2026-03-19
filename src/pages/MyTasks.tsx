@@ -19,7 +19,6 @@ export default function MyTasks() {
   const navigate = useNavigate();
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('all');
-  const [sortBy, setSortBy] = useState<'created' | 'due'>('created');
 
   const getProjectName = (id: string) => projects?.find(p => p.id === id)?.name ?? '';
   const getProfileName = (id: string | null) => profiles?.find(p => p.user_id === id)?.full_name ?? '';
