@@ -439,6 +439,10 @@ function SortableSectionHeader({
   onFinishEdit,
   onCancelEdit,
   onDelete,
+  onMoveUp,
+  onMoveDown,
+  canMoveUp,
+  canMoveDown,
 }: {
   sectionId: string;
   name: string;
@@ -452,6 +456,10 @@ function SortableSectionHeader({
   onFinishEdit: () => void;
   onCancelEdit: () => void;
   onDelete: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: SECTION_PREFIX + sectionId,
@@ -492,12 +500,29 @@ function SortableSectionHeader({
       <span className="text-xs text-muted-foreground ml-1">{taskCount}</span>
       <div className="flex-1" />
       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-        <button onClick={onStartEdit} className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground">
-          <Pencil className="w-3.5 h-3.5" />
-        </button>
-        <button onClick={onDelete} className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive">
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground">
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem onClick={onStartEdit}>
+              <Pencil className="w-3.5 h-3.5 mr-2" /> Rename
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onMoveUp} disabled={!canMoveUp}>
+              <ArrowUp className="w-3.5 h-3.5 mr-2" /> Move up
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onMoveDown} disabled={!canMoveDown}>
+              <ArrowDown className="w-3.5 h-3.5 mr-2" /> Move down
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
+              <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       </div>
     </div>
   );
