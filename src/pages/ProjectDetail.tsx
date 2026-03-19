@@ -351,6 +351,7 @@ export default function ProjectDetail() {
                                   getInitials={getInitials}
                                   getProfileName={getProfileName}
                                   onSelect={() => setSelectedTaskId(task.id)}
+                                  onDelete={() => deleteTask.mutate(task.id)}
                                   onNavigateProject={e => { e.stopPropagation(); navigate(`/projects/${task.project_id}`); }}
                                 />
                               ))
