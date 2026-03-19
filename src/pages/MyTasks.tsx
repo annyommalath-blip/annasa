@@ -30,13 +30,18 @@ export default function MyTasks() {
 
   let filteredTasks = tasks || [];
   if (statusFilter !== 'all') filteredTasks = filteredTasks.filter(t => t.status === statusFilter);
-  if (sortBy === 'due') {
-    filteredTasks = [...filteredTasks].sort((a, b) => {
-      if (!a.due_at) return 1;
-      if (!b.due_at) return -1;
-      return new Date(a.due_at).getTime() - new Date(b.due_at).getTime();
-    });
-  }
+
+  // Sort: non-done tasks first (by due date asc), then done tasks at bottom (by due date asc)
+  filteredTasks = [...filteredTasks].sort((a, b) => {
+    const aDone = a.status === 'done' ? 1 : 0;
+    const bDone = b.status === 'done' ? 1 : 0;
+    if (aDone !== bDone) return aDone - bDone;
+    // Within same group, sort by due date (earliest first, no-date last)
+    if (!a.due_at && !b.due_at) return 0;
+    if (!a.due_at) return 1;
+    if (!b.due_at) return -1;
+    return new Date(a.due_at).getTime() - new Date(b.due_at).getTime();
+  });
 
   return (
     <AppLayout>
