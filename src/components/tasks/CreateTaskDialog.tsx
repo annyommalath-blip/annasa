@@ -12,7 +12,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useCreateTask } from '@/hooks/useTasks';
 import { useProjects, useCreateProject } from '@/hooks/useProjects';
-import { useTeams } from '@/hooks/useTeam';
+import { useTeams, useTeamMembers } from '@/hooks/useTeam';
 import { useProfiles } from '@/hooks/useProfiles';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
