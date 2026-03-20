@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ import {
   User
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { useTask, useUpdateTask, useDeleteTask } from '@/hooks/useTasks';
 import { useSubtasks, useCreateSubtask, useToggleSubtask } from '@/hooks/useSubtasks';
@@ -97,9 +99,25 @@ export function TaskDetailDrawer({ taskId, open, onClose }: TaskDetailDrawerProp
   };
   const projectName = projects?.find(p => p.id === task?.project_id)?.name ?? '';
 
+  const { data: collaboratorRow } = useQuery({
+    queryKey: ['task-collaborator', task?.id, user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('task_collaborators')
+        .select('id')
+        .eq('task_id', task!.id)
+        .eq('user_id', user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!task?.id && !!user?.id,
+  });
+
   if (!task) return null;
 
   const canEdit = task.created_by === user?.id || task.owner_id === user?.id;
+  const canEditDescription = canEdit || !!collaboratorRow;
 
   const handleUpdate = (updates: Record<string, any>) => {
     updateTask.mutate({ id: task.id, ...updates } as any);
@@ -448,14 +466,14 @@ export function TaskDetailDrawer({ taskId, open, onClose }: TaskDetailDrawerProp
                 </div>
               </div>
             ) : (
-              <div
-                className={cn(
-                  "text-sm min-h-[3rem] whitespace-pre-wrap",
-                  task.description ? "text-foreground/80" : "text-muted-foreground italic",
-                  canEdit && "cursor-text hover:bg-muted/30 rounded-md px-2 py-1.5 -mx-2 transition-colors"
-                )}
-                onClick={() => canEdit && setEditingDescription(true)}
-              >
+                <div
+                  className={cn(
+                    "text-sm min-h-[3rem] whitespace-pre-wrap",
+                    task.description ? "text-foreground/80" : "text-muted-foreground italic",
+                    canEditDescription && "cursor-text hover:bg-muted/30 rounded-md px-2 py-1.5 -mx-2 transition-colors"
+                  )}
+                  onClick={() => canEditDescription && setEditingDescription(true)}
+                >
                 {task.description ? renderTextWithLinks(task.description) : 'What is this task about?'}
               </div>
             )}
