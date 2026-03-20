@@ -466,7 +466,6 @@ export function TaskDetailDrawer({ taskId, open, onClose }: TaskDetailDrawerProp
                 </div>
               </div>
             ) : (
-...
                 <div
                   className={cn(
                     "text-sm min-h-[3rem] whitespace-pre-wrap",
