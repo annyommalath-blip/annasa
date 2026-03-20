@@ -28,7 +28,7 @@ import { StatusBadge } from './StatusBadge';
 import { PriorityBadge } from './PriorityBadge';
 import { TaskStatus, TaskPriority } from '@/types';
 import { toast } from '@/hooks/use-toast';
-...
+
 function renderTextWithLinks(text: string) {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const parts = text.split(urlRegex);
