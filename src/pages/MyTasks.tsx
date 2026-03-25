@@ -56,7 +56,6 @@ export default function MyTasks() {
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="not_started">Not Started</SelectItem>
                 <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="done">Done</SelectItem>
               </SelectContent>
             </Select>
           </div>
