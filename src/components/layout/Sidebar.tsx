@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FolderKanban, Bell, CheckSquare, Plus, LogOut, Search, CalendarDays, Settings, User } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Bell, CheckSquare, Plus, LogOut, Search, CalendarDays, Settings, User, Archive } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useProjects } from '@/hooks/useProjects';
