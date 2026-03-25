@@ -27,15 +27,11 @@ export default function MyTasks() {
     return name ? name.split(' ').map(n => n[0]).join('').slice(0, 2) : '?';
   };
 
-  let filteredTasks = tasks || [];
+  let filteredTasks = (tasks || []).filter(t => t.status !== 'done');
   if (statusFilter !== 'all') filteredTasks = filteredTasks.filter(t => t.status === statusFilter);
 
-  // Sort: non-done tasks first (by due date asc), then done tasks at bottom (by due date asc)
+  // Sort by due date (earliest first, no-date last)
   filteredTasks = [...filteredTasks].sort((a, b) => {
-    const aDone = a.status === 'done' ? 1 : 0;
-    const bDone = b.status === 'done' ? 1 : 0;
-    if (aDone !== bDone) return aDone - bDone;
-    // Within same group, sort by due date (earliest first, no-date last)
     if (!a.due_at && !b.due_at) return 0;
     if (!a.due_at) return 1;
     if (!b.due_at) return -1;
@@ -60,7 +56,6 @@ export default function MyTasks() {
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="not_started">Not Started</SelectItem>
                 <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="done">Done</SelectItem>
               </SelectContent>
             </Select>
           </div>
