@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 const navItems = [
   { icon: CheckSquare, label: 'My Tasks', path: '/my-tasks' },
   { icon: CalendarDays, label: 'Calendar', path: '/calendar' },
+  { icon: Archive, label: 'Archive', path: '/archive' },
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: FolderKanban, label: 'Projects', path: '/projects' },
 ];
