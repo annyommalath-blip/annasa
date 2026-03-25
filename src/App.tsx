@@ -11,6 +11,7 @@ import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import Inbox from "./pages/Inbox";
 import ContentCalendar from "./pages/ContentCalendar";
+import Archive from "./pages/Archive";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
