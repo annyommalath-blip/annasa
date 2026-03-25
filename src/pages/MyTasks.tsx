@@ -27,7 +27,7 @@ export default function MyTasks() {
     return name ? name.split(' ').map(n => n[0]).join('').slice(0, 2) : '?';
   };
 
-  let filteredTasks = tasks || [];
+  let filteredTasks = (tasks || []).filter(t => t.status !== 'done');
   if (statusFilter !== 'all') filteredTasks = filteredTasks.filter(t => t.status === statusFilter);
 
   // Sort: non-done tasks first (by due date asc), then done tasks at bottom (by due date asc)
