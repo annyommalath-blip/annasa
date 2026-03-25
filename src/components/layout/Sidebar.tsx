@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FolderKanban, Bell, CheckSquare, Plus, LogOut, Search, CalendarDays, Settings, User } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Bell, CheckSquare, Plus, LogOut, Search, CalendarDays, Settings, User, Archive } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useProjects } from '@/hooks/useProjects';
@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 const navItems = [
   { icon: CheckSquare, label: 'My Tasks', path: '/my-tasks' },
   { icon: CalendarDays, label: 'Calendar', path: '/calendar' },
+  { icon: Archive, label: 'Archive', path: '/archive' },
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: FolderKanban, label: 'Projects', path: '/projects' },
 ];
